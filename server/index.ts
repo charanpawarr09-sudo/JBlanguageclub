@@ -23,9 +23,6 @@ import contentRoutes from './routes/content.routes';
 import adminRoutes from './routes/admin.routes';
 import contactRoutes from './routes/contact.routes';
 
-// Event seed data
-import { events as seedEvents } from '../src/data/events';
-
 // ─── Startup Env Validation ───
 const REQUIRED_ENV_VARS = ['JWT_SECRET', 'ADMIN_PASSWORD_HASH', 'ADMIN_USERNAME'] as const;
 
@@ -113,51 +110,7 @@ app.post('/api/admin/upload', verifyAdmin as any, upload.single('image'), (req: 
     res.json({ url, filename: req.file.filename, size: req.file.size });
 });
 
-/* ─── DB Seeding ─── */
-async function seedDatabase() {
-    try {
-        const existingEvents = await db.select().from(schema.events);
-
-        if (existingEvents.length === 0) {
-            logger.info('Seeding database with events...');
-            for (const event of seedEvents) {
-                await db.insert(schema.events).values({
-                    id: event.id,
-                    title: event.title,
-                    description: event.description,
-                    short_description: event.shortDescription,
-                    date: event.date,
-                    time: event.time,
-                    location: event.location,
-                    category: event.category,
-                    image: event.image,
-                    banner_image: event.banner_image,
-                    thumbnail_image: event.thumbnail_image,
-                    rules: event.rules,
-                    team_size: event.teamSize,
-                    prize: event.prize,
-                    rounds: event.rounds || null,
-                    registration_fee_single: event.registration_fee_single,
-                    registration_fee_team: event.registration_fee_team,
-                    team_size_min: event.team_size_min,
-                    team_size_max: event.team_size_max,
-                    registration_enabled: event.registration_enabled,
-                    is_published: event.is_published,
-                    google_form_url: event.google_form_url,
-                    slots_total: event.slots_total,
-                    slots_filled: event.slots_filled,
-                    judging_criteria: event.judging_criteria,
-                    coordinators: event.coordinators,
-                }).onConflictDoNothing();
-            }
-            logger.info(`Seeded ${seedEvents.length} events`);
-        } else {
-            logger.info(`Database already has ${existingEvents.length} events, skipping seed`);
-        }
-    } catch (err) {
-        logger.warn('DB seeding failed (tables may not exist yet)', { error: String(err) });
-    }
-}
+/* ─── No auto-seeding: events are managed entirely via admin panel ─── */
 
 /* ─── Static Files (Production) ─── */
 const distPath = path.resolve(process.cwd(), 'dist');
@@ -201,7 +154,6 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
 app.listen(PORT, () => {
     logger.info(`Server running on port ${PORT}`);
     logger.info('Routes mounted: auth, events, team, registrations, content, admin, contact');
-    seedDatabase();
 });
 
 export default app;
