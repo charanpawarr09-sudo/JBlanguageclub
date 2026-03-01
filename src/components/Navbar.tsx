@@ -49,7 +49,7 @@ export default function Navbar() {
                 <div className="relative">
                   {/* Outer glow pulse */}
                   <div className="absolute -inset-1.5 bg-gradient-to-r from-teal-600 to-emerald-700 rounded-full opacity-0 group-hover:opacity-60 blur-md transition-all duration-500 animate-pulse" />
-                  <img src="/jblc-logo-clean.png" alt="JB Language Club" className="relative h-12 w-12 object-contain transition-transform duration-300 group-hover:scale-105" />
+                  <img src="/jblc-logo-clean.png" alt="JB Language Club" className="relative h-14 w-14 object-contain transition-transform duration-300 group-hover:scale-105" />
                 </div>
                 <div className="flex flex-col">
                   <span className="font-bold text-[17px] tracking-wide text-white leading-none group-hover:text-teal-200 transition-colors duration-300" style={{ fontFamily: 'var(--font-heading)' }}>
