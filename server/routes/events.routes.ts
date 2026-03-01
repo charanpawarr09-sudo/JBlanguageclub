@@ -93,8 +93,7 @@ router.patch('/api/admin/events/:id/toggle', verifyAdmin, async (req: AuthReques
 });
 
 // Admin: Purge ALL events (hard delete everything — use with caution)
-// NOTE: This must come BEFORE the /:id route to avoid Express matching "purge" as an ID
-router.delete('/api/admin/events-purge-all', verifyAdmin, async (req: AuthRequest, res: Response) => {
+router.post('/api/admin/purge-events', verifyAdmin, async (req: AuthRequest, res: Response) => {
     try {
         const allEvents = await db.select().from(schema.events);
         await db.delete(schema.events);
