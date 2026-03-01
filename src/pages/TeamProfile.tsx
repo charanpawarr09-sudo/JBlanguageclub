@@ -123,7 +123,7 @@ export default function TeamProfile() {
             <PageSEO title={member.name} description={`${member.name} — ${member.role} at JBLC`} />
 
             {/* ═══ Hero / Profile Header with Animated Background ═══ */}
-            <section className="relative pt-28 pb-20 overflow-hidden">
+            <section className="relative pt-32 pb-20 overflow-hidden">
                 {/* Animated Background Layers */}
                 <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-[#061515] to-[var(--bg-primary)]" />
                 <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_20%,_rgba(20,184,166,0.08)_0%,_transparent_50%)]" />
@@ -168,10 +168,10 @@ export default function TeamProfile() {
                         </motion.button>
                     </div>
 
-                    <div className="flex flex-col lg:flex-row gap-12 items-start">
+                    <div className="flex flex-col lg:flex-row gap-10 lg:gap-12 items-center lg:items-start">
                         {/* Left: Avatar + Contact */}
                         <motion.div
-                            className="flex flex-col items-center lg:items-start gap-6 lg:w-80 flex-shrink-0"
+                            className="flex flex-col items-center gap-6 lg:w-80 flex-shrink-0 w-full max-w-sm"
                             initial={{ opacity: 0, y: 30 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.6 }}
@@ -196,7 +196,7 @@ export default function TeamProfile() {
                             </div>
 
                             {/* Role Badge */}
-                            <div className="text-center lg:text-left">
+                            <div className="text-center">
                                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-500/10 border border-teal-500/20 text-teal-400 text-xs font-medium">
                                     <Sparkles className="w-3 h-3" /> {member.dept_group || 'JBLC'}
                                 </span>
@@ -238,11 +238,11 @@ export default function TeamProfile() {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.15, duration: 0.6 }}
                         >
-                            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-2" style={{ fontFamily: 'var(--font-display)' }}>
+                            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-2 text-center lg:text-left" style={{ fontFamily: 'var(--font-display)' }}>
                                 {member.name}
                             </h1>
-                            <p className="text-xl text-teal-400 font-medium mb-1">{member.role}</p>
-                            {member.designation && <p className="text-slate-500 text-sm mb-6">{member.designation}</p>}
+                            <p className="text-lg sm:text-xl text-teal-400 font-medium mb-1 text-center lg:text-left">{member.role}</p>
+                            {member.designation && <p className="text-slate-500 text-sm mb-6 text-center lg:text-left">{member.designation}</p>}
 
                             {/* Motto Quote */}
                             {member.motto && (
