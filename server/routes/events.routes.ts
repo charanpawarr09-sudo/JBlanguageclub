@@ -92,6 +92,22 @@ router.patch('/api/admin/events/:id/toggle', verifyAdmin, async (req: AuthReques
     }
 });
 
+// Admin: Purge ALL events (hard delete everything — use with caution)
+// NOTE: This must come BEFORE the /:id route to avoid Express matching "purge" as an ID
+router.delete('/api/admin/events-purge-all', verifyAdmin, async (req: AuthRequest, res: Response) => {
+    try {
+        const allEvents = await db.select().from(schema.events);
+        await db.delete(schema.events);
+        await logAudit(req, 'purge_all', 'event', null, { count: allEvents.length }, null);
+        logger.info(`Purged all ${allEvents.length} events from database`);
+        res.json({ success: true, message: `Deleted ${allEvents.length} events` });
+    } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to purge events';
+        logger.error('Failed to purge events', { error: message });
+        res.status(500).json({ success: false, error: message });
+    }
+});
+
 // Admin: Delete event (permanent)
 router.delete('/api/admin/events/:id', verifyAdmin, async (req: AuthRequest, res: Response) => {
     try {
@@ -103,21 +119,6 @@ router.delete('/api/admin/events/:id', verifyAdmin, async (req: AuthRequest, res
     } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to delete event';
         logger.error('Failed to delete event', { error: message });
-        res.status(500).json({ success: false, error: message });
-    }
-});
-
-// Admin: Purge ALL events (hard delete everything — use with caution)
-router.delete('/api/admin/events/purge/all', verifyAdmin, async (req: AuthRequest, res: Response) => {
-    try {
-        const allEvents = await db.select().from(schema.events);
-        await db.delete(schema.events);
-        await logAudit(req, 'purge_all', 'event', null, { count: allEvents.length }, null);
-        logger.info(`Purged all ${allEvents.length} events from database`);
-        res.json({ success: true, message: `Deleted ${allEvents.length} events` });
-    } catch (err) {
-        const message = err instanceof Error ? err.message : 'Failed to purge events';
-        logger.error('Failed to purge events', { error: message });
         res.status(500).json({ success: false, error: message });
     }
 });
