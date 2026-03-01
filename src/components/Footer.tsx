@@ -53,9 +53,7 @@ export default function Footer() {
           {/* Column 1: Logo + Tagline + Social */}
           <div>
             <Link to="/" className="flex items-center gap-3 mb-4" aria-label="VOXERA Home">
-              <div className="p-[2px] rounded-full bg-gradient-to-br from-teal-500 via-emerald-600 to-teal-700">
-                <img src="/jblc-logo.png" alt="JB Language Club" className="h-10 w-10 rounded-full object-cover bg-slate-950" />
-              </div>
+              <img src="/jblc-logo.png" alt="JB Language Club" className="h-10 w-10 rounded-full object-cover" />
               <div className="flex flex-col">
                 <span className="font-bold text-lg tracking-wide text-white" style={{ fontFamily: 'var(--font-heading)' }}>JB Language Club</span>
                 <span className="text-[10px] font-semibold tracking-[0.25em] uppercase bg-gradient-to-r from-teal-400 to-teal-400 bg-clip-text text-transparent">Literary Fiesta</span>
