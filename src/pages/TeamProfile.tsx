@@ -123,7 +123,7 @@ export default function TeamProfile() {
             <PageSEO title={member.name} description={`${member.name} — ${member.role} at JBLC`} />
 
             {/* ═══ Hero / Profile Header with Animated Background ═══ */}
-            <section className="relative pt-32 pb-20 overflow-hidden">
+            <section className="relative pt-24 pb-16 overflow-hidden">
                 {/* Animated Background Layers */}
                 <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-[#061515] to-[var(--bg-primary)]" />
                 <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_20%,_rgba(20,184,166,0.08)_0%,_transparent_50%)]" />
@@ -153,7 +153,7 @@ export default function TeamProfile() {
 
                 <div className="container mx-auto px-4 relative z-10">
                     {/* Back + Share buttons */}
-                    <div className="flex items-center justify-between mb-10">
+                    <div className="flex items-center justify-between mb-6">
                         <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}>
                             <Link to={ROUTES.ABOUT} className="inline-flex items-center gap-2 text-slate-400 hover:text-teal-400 transition-colors group">
                                 <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> Back to Team
