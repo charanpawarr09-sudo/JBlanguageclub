@@ -19,7 +19,7 @@ export default function LoadingScreen() {
                 <div className="relative mb-8">
                     <div className="absolute -inset-4 bg-gradient-to-r from-teal-500 to-emerald-600 rounded-full opacity-20 blur-xl animate-pulse" />
                     <div className="relative p-[3px] rounded-full bg-gradient-to-br from-teal-400 via-emerald-500 to-teal-700 glow-pulse">
-                        <img src="/jblc-logo.png" alt="Loading" className="h-20 w-20 rounded-full object-cover bg-slate-950" />
+                        <img src="/jblc-logo-clean.png" alt="Loading" className="h-20 w-20 rounded-full object-cover bg-slate-950" />
                     </div>
                 </div>
 
