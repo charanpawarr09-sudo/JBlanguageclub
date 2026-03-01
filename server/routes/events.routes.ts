@@ -9,7 +9,7 @@ import { logAudit, stripTimestampsKeepId, publicCache } from './helpers';
 const router = Router();
 
 // Public: list published events
-router.get('/api/events', publicCache(300), async (_req: Request, res: Response) => {
+router.get('/api/events', publicCache(30), async (_req: Request, res: Response) => {
     try {
         const all = await db.select().from(schema.events);
         // Strip google_form_url from public response — it's only accessible after payment
@@ -20,7 +20,7 @@ router.get('/api/events', publicCache(300), async (_req: Request, res: Response)
 });
 
 // Public: get event by id
-router.get('/api/events/:id', publicCache(300), async (req: Request, res: Response) => {
+router.get('/api/events/:id', publicCache(30), async (req: Request, res: Response) => {
     try {
         const [event] = await db.select().from(schema.events).where(eq(schema.events.id, req.params.id)).limit(1);
         if (!event) { res.status(404).json({ error: 'Event not found' }); return; }
