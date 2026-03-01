@@ -67,13 +67,17 @@ export default function Contact() {
   };
 
   // Dynamically get contact info from settings, with sensible defaults
-  const contactEmail1 = settings.contact_email || settings.email || 'voxera2026@gmail.com';
+  const contactEmail1 = settings.contact_email || 'voxera2026@gmail.com';
   const contactEmail2 = settings.contact_email_2 || 'jblanguageclub@jbiet.edu.in';
-  const contactPhone1 = settings.contact_phone || settings.phone || '';
+  const contactPhone1 = settings.contact_phone || '';
   const contactPhone2 = settings.contact_phone_2 || '';
-  const contactAddress = settings.contact_address || 'JB Institute of Engineering & Technology\nYenkapally, Moinabad\nHyderabad, Telangana 500075';
-  const instagramUrl = settings.instagram_url || settings.instagram || '#';
-  const emailUrl = `mailto:${settings.contact_email || 'voxera2026@gmail.com'}`;
+  const contactAddress = (settings.contact_address_line1 && settings.contact_address_line2)
+    ? `${settings.contact_address_line1}\n${settings.contact_address_line2}`
+    : settings.contact_address_line1 || settings.contact_address || 'JB Institute of Engineering & Technology\nYenkapally, Moinabad\nHyderabad, Telangana 500075';
+  const instagramUrl = settings.social_instagram || '#';
+  const chatUrl = settings.contact_chat_url || '#';
+  const emailUrl = `mailto:${contactEmail1}`;
+  const pageSubtitle = settings.contact_page_subtitle || 'Have questions? We\'re here to help. Reach out to us for any queries regarding events, registration, or sponsorship.';
 
   const inputClass =
     'w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-white placeholder:text-slate-500 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none transition-all min-h-[48px]';
@@ -100,7 +104,7 @@ export default function Contact() {
               Get in <span className="gradient-title italic">Touch</span>
             </h1>
             <p className="text-slate-400 max-w-2xl mx-auto text-lg mb-4">
-              Have questions? We're here to help. Reach out to us for any queries regarding events, registration, or sponsorship.
+              {pageSubtitle}
             </p>
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium">
               <Clock className="w-3 h-3" /> We typically respond within 24 hours
@@ -151,7 +155,7 @@ export default function Contact() {
                     {[
                       { icon: Instagram, label: 'Instagram', href: instagramUrl },
                       { icon: Mail, label: 'Email', href: emailUrl },
-                      { icon: MessageSquare, label: 'Chat', href: '#' },
+                      { icon: MessageSquare, label: 'Chat', href: chatUrl },
                     ].map((social) => (
                       <a
                         key={social.label}

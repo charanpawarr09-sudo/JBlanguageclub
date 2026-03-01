@@ -106,10 +106,14 @@ export default function ContentEditor() {
                     <h3 className="text-lg font-semibold text-white pt-4 border-t border-slate-800">About Section</h3>
                     <div><label className="block text-sm font-medium text-slate-300 mb-1.5">About Text</label><textarea rows={4} value={settings.about_text || ''} onChange={e => setSettings({ ...settings, about_text: e.target.value })} className={inputCls} /></div>
                     <h3 className="text-lg font-semibold text-white pt-4 border-t border-slate-800">Contact Info</h3>
+                    <div><label className="block text-sm font-medium text-slate-300 mb-1.5">Contact Page Subtitle</label><input value={settings.contact_page_subtitle || ''} onChange={e => setSettings({ ...settings, contact_page_subtitle: e.target.value })} className={inputCls} placeholder="Have questions? We're here to help..." /></div>
                     <div className="grid grid-cols-2 gap-4">
                         <div><label className="block text-sm font-medium text-slate-300 mb-1.5">Email</label><input type="email" value={settings.contact_email || ''} onChange={e => setSettings({ ...settings, contact_email: e.target.value })} className={inputCls} /></div>
+                        <div><label className="block text-sm font-medium text-slate-300 mb-1.5">Email 2</label><input type="email" value={settings.contact_email_2 || ''} onChange={e => setSettings({ ...settings, contact_email_2: e.target.value })} className={inputCls} placeholder="Secondary email (optional)" /></div>
                         <div><label className="block text-sm font-medium text-slate-300 mb-1.5">Phone</label><input value={settings.contact_phone || ''} onChange={e => setSettings({ ...settings, contact_phone: e.target.value })} className={inputCls} /></div>
+                        <div><label className="block text-sm font-medium text-slate-300 mb-1.5">Phone 2</label><input value={settings.contact_phone_2 || ''} onChange={e => setSettings({ ...settings, contact_phone_2: e.target.value })} className={inputCls} placeholder="Secondary phone (optional)" /></div>
                     </div>
+                    <div><label className="block text-sm font-medium text-slate-300 mb-1.5">Chat / WhatsApp URL</label><input value={settings.contact_chat_url || ''} onChange={e => setSettings({ ...settings, contact_chat_url: e.target.value })} className={inputCls} placeholder="https://wa.me/91XXXXXXXXXX" /></div>
                     <h3 className="text-lg font-semibold text-white pt-4 border-t border-slate-800">Social Media</h3>
                     <div className="grid grid-cols-2 gap-4">
                         <div><label className="block text-sm font-medium text-slate-300 mb-1.5">Instagram</label><input value={settings.social_instagram || ''} onChange={e => setSettings({ ...settings, social_instagram: e.target.value })} className={inputCls} /></div>
