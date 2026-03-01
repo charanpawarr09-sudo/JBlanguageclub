@@ -96,7 +96,7 @@ export default function Schedule() {
     <Layout>
       <PageSEO title="Schedule" description="Full event timeline for VOXERA 2026." />
 
-      <div className="min-h-screen py-20 px-4 relative overflow-hidden">
+      <div className="min-h-screen pt-32 pb-20 px-4 relative overflow-hidden">
         {/* Premium background */}
         <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-[#0a0d15] to-[var(--bg-primary)]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,_rgba(139,92,246,0.06)_0%,_transparent_50%)]" />
@@ -110,7 +110,7 @@ export default function Schedule() {
             >
               <Sparkles className="w-3.5 h-3.5" /> Full Schedule
             </motion.span>
-            <h1 className="text-5xl md:text-7xl font-bold mb-4 text-white" style={{ fontFamily: 'var(--font-display)' }}>
+            <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold mb-4 text-white" style={{ fontFamily: 'var(--font-display)' }}>
               Event <span className="bg-gradient-to-r from-violet-400 to-purple-400 bg-clip-text text-transparent italic">Timeline</span>
             </h1>
             <p className="text-slate-400 max-w-2xl mx-auto text-lg">

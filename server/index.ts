@@ -55,16 +55,14 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 /* ─── Global Middleware ─── */
-app.use(helmet({
-    contentSecurityPolicy: false,
-    hsts: { maxAge: 31536000, includeSubDomains: true, preload: true },
-    referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
-    xContentTypeOptions: true,
-    xFrameOptions: { action: 'deny' },
-}));
+app.use(helmet({ contentSecurityPolicy: false }));
 
-// Additional security headers
+// Security headers
 app.use((_req: Request, res: Response, next: NextFunction) => {
+    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
     res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
     res.setHeader('X-XSS-Protection', '1; mode=block');
     next();

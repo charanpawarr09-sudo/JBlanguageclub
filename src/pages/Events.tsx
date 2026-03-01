@@ -67,7 +67,7 @@ export default function Events() {
         description="Explore all events at VOXERA 2026 — debates, poetry, open mic, pitch competitions, treasure hunts, and film screenings."
       />
 
-      <section className="py-24 px-4 min-h-screen relative overflow-hidden">
+      <section className="pt-32 pb-24 px-4 min-h-screen relative overflow-hidden">
         {/* Background */}
         <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-[#061515] to-[var(--bg-primary)]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,_rgba(20,120,110,0.08)_0%,_transparent_50%)]" />
@@ -89,7 +89,7 @@ export default function Events() {
             </motion.span>
 
             <h1
-              className="text-5xl md:text-7xl font-bold mb-4 text-white"
+              className="text-4xl sm:text-5xl md:text-7xl font-bold mb-4 text-white"
               style={{ fontFamily: 'var(--font-display)' }}
             >
               All <span className="gradient-title">Events</span>

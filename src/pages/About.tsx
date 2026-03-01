@@ -74,7 +74,7 @@ export default function About() {
             <PageSEO title="About" description="Learn about VOXERA 2026 and JB Language Club at JBIET." />
 
             {/* ─── Hero Banner ─── */}
-            <section className="relative py-32 overflow-hidden">
+            <section className="relative pt-36 pb-24 overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-[#061515] to-[var(--bg-primary)]" />
                 <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_50%,_rgba(20,120,110,0.1)_0%,_transparent_60%)]" />
                 <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_70%_50%,_rgba(197,165,90,0.05)_0%,_transparent_60%)]" />
@@ -89,7 +89,7 @@ export default function About() {
                     </motion.span>
 
                     <motion.h1
-                        className="text-5xl md:text-7xl font-bold mb-6 text-white"
+                        className="text-4xl sm:text-5xl md:text-7xl font-bold mb-6 text-white"
                         style={{ fontFamily: 'var(--font-display)' }}
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}

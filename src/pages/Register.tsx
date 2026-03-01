@@ -367,10 +367,10 @@ export default function Register() {
           <div className="flex items-center gap-1.5">
             <div
               className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-xs sm:text-sm font-bold transition-all duration-300 ${step === s.num
-                  ? 'bg-gradient-to-r from-teal-600 to-purple-600 text-white shadow-lg shadow-teal-600/40'
-                  : step > s.num
-                    ? 'bg-teal-900/50 text-teal-200'
-                    : 'bg-white/5 text-white/30'
+                ? 'bg-gradient-to-r from-teal-600 to-purple-600 text-white shadow-lg shadow-teal-600/40'
+                : step > s.num
+                  ? 'bg-teal-900/50 text-teal-200'
+                  : 'bg-white/5 text-white/30'
                 }`}
             >
               {step > s.num ? <CheckCircle className="w-4 h-4" /> : s.num}
@@ -398,7 +398,7 @@ export default function Register() {
     <Layout>
       <PageSEO title="Register" description="Register for VOXERA 2026 events — secure your spot today." />
 
-      <div className="min-h-screen py-20 px-4 flex items-start justify-center bg-[#080810] relative overflow-hidden">
+      <div className="min-h-screen pt-28 pb-20 px-4 flex items-start justify-center bg-[#080810] relative overflow-hidden">
         {/* Aurora Blobs */}
         <div className="absolute top-0 left-1/3 w-[500px] h-[500px] bg-teal-600/15 rounded-full blur-[120px] pointer-events-none" />
         <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-purple-500/10 rounded-full blur-[100px] pointer-events-none" />
