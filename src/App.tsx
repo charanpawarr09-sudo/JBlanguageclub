@@ -4,6 +4,7 @@ import { AnimatePresence } from 'motion/react';
 import { HelmetProvider } from 'react-helmet-async';
 import { ROUTES } from './constants/routes';
 import ProtectedRoute from './components/ProtectedRoute';
+import { ToastProvider } from './components/Toast';
 
 // Lazy-loaded pages
 const Home = lazy(() => import('./pages/Home'));
@@ -34,34 +35,36 @@ function LoadingFallback() {
 export default function App() {
   return (
     <HelmetProvider>
-      <Router>
-        <Suspense fallback={<LoadingFallback />}>
-          <AnimatePresence mode="wait">
-            <Routes>
-              <Route path={ROUTES.HOME} element={<Home />} />
-              <Route path={ROUTES.EVENTS} element={<Events />} />
-              <Route path={ROUTES.EVENT_DETAIL} element={<EventDetails />} />
-              <Route path={ROUTES.SCHEDULE} element={<Schedule />} />
-              <Route path={ROUTES.REGISTER} element={<Register />} />
-              <Route path={ROUTES.REGISTER_SUCCESS} element={<RegisterSuccess />} />
-              <Route path={ROUTES.CONTACT} element={<Contact />} />
-              <Route path={ROUTES.ABOUT} element={<About />} />
-              <Route path={ROUTES.TEAM_PROFILE} element={<TeamProfile />} />
-              <Route path={ROUTES.PAST_EVENT_DETAIL} element={<PastEventDetail />} />
-              <Route path={ROUTES.ADMIN_LOGIN} element={<AdminLogin />} />
-              <Route
-                path={ROUTES.ADMIN}
-                element={
-                  <ProtectedRoute>
-                    <Admin />
-                  </ProtectedRoute>
-                }
-              />
-              <Route path={ROUTES.NOT_FOUND} element={<NotFound />} />
-            </Routes>
-          </AnimatePresence>
-        </Suspense>
-      </Router>
+      <ToastProvider>
+        <Router>
+          <Suspense fallback={<LoadingFallback />}>
+            <AnimatePresence mode="wait">
+              <Routes>
+                <Route path={ROUTES.HOME} element={<Home />} />
+                <Route path={ROUTES.EVENTS} element={<Events />} />
+                <Route path={ROUTES.EVENT_DETAIL} element={<EventDetails />} />
+                <Route path={ROUTES.SCHEDULE} element={<Schedule />} />
+                <Route path={ROUTES.REGISTER} element={<Register />} />
+                <Route path={ROUTES.REGISTER_SUCCESS} element={<RegisterSuccess />} />
+                <Route path={ROUTES.CONTACT} element={<Contact />} />
+                <Route path={ROUTES.ABOUT} element={<About />} />
+                <Route path={ROUTES.TEAM_PROFILE} element={<TeamProfile />} />
+                <Route path={ROUTES.PAST_EVENT_DETAIL} element={<PastEventDetail />} />
+                <Route path={ROUTES.ADMIN_LOGIN} element={<AdminLogin />} />
+                <Route
+                  path={ROUTES.ADMIN}
+                  element={
+                    <ProtectedRoute>
+                      <Admin />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route path={ROUTES.NOT_FOUND} element={<NotFound />} />
+              </Routes>
+            </AnimatePresence>
+          </Suspense>
+        </Router>
+      </ToastProvider>
     </HelmetProvider>
   );
 }

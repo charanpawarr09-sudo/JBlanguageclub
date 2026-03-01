@@ -406,7 +406,116 @@ section {
   background-clip: text;
 }
 
-/* ─── PREMIUM: 3D Tilt card hover ─── */
+/* ─── PREMIUM: Morphing gradient blobs (#21) ─── */
+@keyframes blob-morph {
+
+  0%,
+  100% {
+    border-radius: 40% 60% 60% 40% / 60% 30% 70% 40%;
+    transform: translate(0, 0) rotate(0deg);
+  }
+
+  25% {
+    border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%;
+    transform: translate(20px, -30px) rotate(90deg);
+  }
+
+  50% {
+    border-radius: 60% 40% 30% 70% / 60% 40% 60% 30%;
+    transform: translate(-10px, 20px) rotate(180deg);
+  }
+
+  75% {
+    border-radius: 40% 60% 50% 50% / 30% 60% 40% 70%;
+    transform: translate(15px, -15px) rotate(270deg);
+  }
+}
+
+@keyframes blob-color-shift {
+
+  0%,
+  100% {
+    opacity: 0.07;
+    filter: hue-rotate(0deg) blur(80px);
+  }
+
+  33% {
+    opacity: 0.12;
+    filter: hue-rotate(30deg) blur(100px);
+  }
+
+  66% {
+    opacity: 0.08;
+    filter: hue-rotate(-20deg) blur(90px);
+  }
+}
+
+.gradient-blob {
+  position: absolute;
+  pointer-events: none;
+  animation: blob-morph 20s ease-in-out infinite, blob-color-shift 15s ease-in-out infinite;
+  will-change: transform, border-radius, filter;
+}
+
+.gradient-blob-1 {
+  width: 500px;
+  height: 500px;
+  background: linear-gradient(135deg, #14b8a6, #06b6d4, #8b5cf6);
+  top: 5%;
+  left: 5%;
+  animation-delay: 0s, -3s;
+}
+
+.gradient-blob-2 {
+  width: 400px;
+  height: 400px;
+  background: linear-gradient(225deg, #f59e0b, #ef4444, #ec4899);
+  bottom: 10%;
+  right: 8%;
+  animation-delay: -5s, -8s;
+}
+
+.gradient-blob-3 {
+  width: 350px;
+  height: 350px;
+  background: linear-gradient(315deg, #6366f1, #14b8a6, #22d3ee);
+  top: 40%;
+  left: 45%;
+  animation-delay: -10s, -5s;
+}
+
+/* ─── PREMIUM: 3D Tilt card hover (#22) ─── */
+.tilt-card-3d {
+  perspective: 800px;
+  transform-style: preserve-3d;
+}
+
+.tilt-card-3d .tilt-inner {
+  transition: transform 0.1s ease-out, box-shadow 0.3s ease;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.tilt-card-3d:hover .tilt-inner {
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 30px rgba(20, 184, 166, 0.1);
+}
+
+.tilt-card-3d .tilt-shine {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.08), transparent 60%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 10;
+}
+
+.tilt-card-3d:hover .tilt-shine {
+  opacity: 1;
+}
+
+/* Keep old tilt-card for backward compat */
 .tilt-card {
   transform-style: preserve-3d;
   perspective: 1000px;

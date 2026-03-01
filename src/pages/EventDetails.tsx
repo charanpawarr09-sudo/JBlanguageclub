@@ -129,6 +129,27 @@ export default function EventDetails() {
     <Layout>
       <PageSEO title={event.title} description={event.shortDescription} image={event.banner_image || event.image} />
 
+      {/* JSON-LD Structured Data for SEO (#9) */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{
+        __html: JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'Event',
+          name: event.title,
+          description: event.shortDescription || event.description,
+          startDate: event.date,
+          location: {
+            '@type': 'Place',
+            name: event.location || 'JBIET Campus',
+            address: { '@type': 'PostalAddress', addressLocality: 'Hyderabad', addressRegion: 'Telangana', addressCountry: 'IN' },
+          },
+          image: event.banner_image || event.image,
+          organizer: { '@type': 'Organization', name: 'JB Language Club', url: 'https://jblanguageclub.in' },
+          eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+          eventStatus: 'https://schema.org/EventScheduled',
+          ...(event.registration_fee_single ? { offers: { '@type': 'Offer', price: event.registration_fee_single, priceCurrency: 'INR', availability: event.registration_enabled ? 'https://schema.org/InStock' : 'https://schema.org/SoldOut' } } : {}),
+        })
+      }} />
+
       {/* ─── Premium Banner ─── */}
       <div className="relative h-[55vh] w-full overflow-hidden">
         {/* Multi-layer gradient overlays */}

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Calendar, ArrowRight, Users, IndianRupee } from 'lucide-react';
 import { VoxeraEvent } from '../data/events';
 import { getDisplayFee } from '../constants/fees';
+import { useRef, useCallback } from 'react';
 
 interface EventCardProps {
   event: VoxeraEvent;
@@ -20,18 +21,61 @@ const cardReveal = {
 
 export default function EventCard({ event, index }: EventCardProps) {
   const isFull = event.slots_total !== null && event.slots_filled >= event.slots_total;
+  const cardRef = useRef<HTMLDivElement>(null);
+  const shineRef = useRef<HTMLDivElement>(null);
+
+  /* ─── 3D Tilt on mouse move (#22) ─── */
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const card = cardRef.current;
+    if (!card) return;
+    const rect = card.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    const rotateX = ((y - centerY) / centerY) * -8; // max 8 degrees
+    const rotateY = ((x - centerX) / centerX) * 8;
+    card.style.transform = `perspective(800px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.03, 1.03, 1.03)`;
+    // Update shine position
+    if (shineRef.current) {
+      shineRef.current.style.setProperty('--mouse-x', `${(x / rect.width) * 100}%`);
+      shineRef.current.style.setProperty('--mouse-y', `${(y / rect.height) * 100}%`);
+      shineRef.current.style.opacity = '1';
+    }
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    if (cardRef.current) {
+      cardRef.current.style.transform = 'perspective(800px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';
+    }
+    if (shineRef.current) {
+      shineRef.current.style.opacity = '0';
+    }
+  }, []);
 
   return (
     <Link to={`/events/${event.id}`} className="block group" aria-label={`View ${event.title}`}>
       <motion.div
         variants={cardReveal}
-        className="relative rounded-2xl overflow-hidden transition-all duration-500 hover:scale-[1.03]"
+        className="relative rounded-2xl overflow-hidden tilt-card-3d"
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
       >
         {/* Animated gradient border */}
         <div className="absolute -inset-[1px] rounded-2xl bg-gradient-to-br from-teal-500/20 via-transparent to-amber-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-        {/* Card body */}
-        <div className="relative bg-slate-900/80 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/[0.06] group-hover:border-teal-500/30 transition-all duration-500">
+        {/* Card body with 3D tilt */}
+        <div
+          ref={cardRef}
+          className="relative bg-slate-900/80 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/[0.06] group-hover:border-teal-500/30 transition-all duration-300"
+          style={{ transformStyle: 'preserve-3d', transition: 'transform 0.15s ease-out, border-color 0.5s' }}
+        >
+          {/* Shine overlay */}
+          <div
+            ref={shineRef}
+            className="absolute inset-0 rounded-2xl pointer-events-none z-20 opacity-0 transition-opacity duration-300"
+            style={{ background: 'radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255,255,255,0.08), transparent 60%)' }}
+          />
 
           {/* Registration Closed Overlay */}
           {isFull && (

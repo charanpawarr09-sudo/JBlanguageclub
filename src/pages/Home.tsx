@@ -213,6 +213,11 @@ export default function Home() {
           className="absolute top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-violet-500/[0.02] rounded-full blur-[140px] pointer-events-none animate-float-orb-3"
         />
 
+        {/* Morphing gradient blobs — color-cycling organic shapes (#21) */}
+        <div className="gradient-blob gradient-blob-1" />
+        <div className="gradient-blob gradient-blob-2" />
+        <div className="gradient-blob gradient-blob-3" />
+
         {/* Noise overlay - lightweight */}
         <div className="absolute inset-0 pointer-events-none opacity-[0.015]" style={{ backgroundImage: 'url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIj48ZmlsdGVyIGlkPSJhIiB4PSIwIiB5PSIwIj48ZmVUdXJidWxlbmNlIHR5cGU9ImZyYWN0YWxOb2lzZSIgYmFzZUZyZXF1ZW5jeT0iLjc1IiBzdGl0Y2hUaWxlcz0ic3RpdGNoIi8+PC9maWx0ZXI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsdGVyPSJ1cmwoI2EpIi8+PC9zdmc+)' }} />
 

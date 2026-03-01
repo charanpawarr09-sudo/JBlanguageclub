@@ -3,4 +3,4 @@ Allow: /
 Disallow: /admin
 Disallow: /admin/login
 
-Sitemap: https://voxera2026.vercel.app/sitemap.xml
+Sitemap: https://jblanguageclub.in/sitemap.xml
