@@ -34,7 +34,14 @@ export default function Events() {
     fetch('/api/events')
       .then((res) => res.json())
       .then((data) => {
-        setEvents(data.filter((e: VoxeraEvent) => e.is_published));
+        const mapped = data
+          .filter((e: Record<string, unknown>) => e.is_published)
+          .map((e: Record<string, unknown>): VoxeraEvent => ({
+            ...e,
+            shortDescription: (e.short_description || e.shortDescription || '') as string,
+            teamSize: (e.team_size || e.teamSize || '') as string,
+          } as VoxeraEvent));
+        setEvents(mapped);
         setLoading(false);
       })
       .catch(() => setLoading(false));

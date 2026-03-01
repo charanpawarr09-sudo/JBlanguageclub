@@ -113,7 +113,14 @@ export default function Register() {
     fetch(`${VITE_API_BASE}/api/events`)
       .then((res) => res.json())
       .then((data) => {
-        setEvents(data.filter((e: VoxeraEvent) => e.is_published && e.registration_enabled));
+        const mapped = data
+          .filter((e: Record<string, unknown>) => e.is_published && e.registration_enabled)
+          .map((e: Record<string, unknown>): VoxeraEvent => ({
+            ...e,
+            shortDescription: (e.short_description || e.shortDescription || '') as string,
+            teamSize: (e.team_size || e.teamSize || '') as string,
+          } as VoxeraEvent));
+        setEvents(mapped);
         setLoadingEvents(false);
       })
       .catch(() => setLoadingEvents(false));

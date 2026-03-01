@@ -158,7 +158,14 @@ export default function Home() {
       fetch('/api/events').then(r => r.json()).catch((): never[] => []),
       fetch('/api/settings').then(r => r.json()).catch(() => ({})),
     ]).then(([eventsData, settingsData]) => {
-      setEvents((eventsData || []).filter((e: VoxeraEvent) => e.is_published).slice(0, 3));
+      setEvents((eventsData || [])
+        .filter((e: Record<string, unknown>) => e.is_published)
+        .map((e: Record<string, unknown>): VoxeraEvent => ({
+          ...e,
+          shortDescription: (e.short_description || e.shortDescription || '') as string,
+          teamSize: (e.team_size || e.teamSize || '') as string,
+        } as VoxeraEvent))
+        .slice(0, 3));
       setSettings(settingsData || {});
       setLoading(false);
     }).catch(() => setLoading(false));
