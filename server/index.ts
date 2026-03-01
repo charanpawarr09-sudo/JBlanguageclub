@@ -44,14 +44,35 @@ const PORT = parseInt(process.env.PORT || '3000', 10);
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-me';
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 
+/* ─── HTTPS Redirect (Production) ─── */
+if (process.env.NODE_ENV === 'production') {
+    app.use((req: Request, res: Response, next: NextFunction) => {
+        if (req.headers['x-forwarded-proto'] !== 'https') {
+            return res.redirect(301, `https://${req.hostname}${req.url}`);
+        }
+        next();
+    });
+}
+
 /* ─── Global Middleware ─── */
 app.use(helmet({
     contentSecurityPolicy: false,
+    hsts: { maxAge: 31536000, includeSubDomains: true, preload: true },
+    referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+    xContentTypeOptions: true,
+    xFrameOptions: { action: 'deny' },
 }));
+
+// Additional security headers
+app.use((_req: Request, res: Response, next: NextFunction) => {
+    res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    next();
+});
+
 const allowedOrigins = FRONTEND_URL.split(',').map(o => o.trim()).filter(Boolean);
 app.use(cors({
     origin: (origin, callback) => {
-        // Allow requests with no origin (mobile apps, curl, etc.)
         if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
@@ -64,6 +85,11 @@ app.use(compression());
 app.use(cookieParser());
 app.use(express.json({ limit: '5mb' }));
 app.use(generalLimiter);
+
+/* ─── Health Check (prevents Render cold-start) ─── */
+app.get('/api/health', (_req: Request, res: Response) => {
+    res.status(200).json({ status: 'ok', uptime: process.uptime(), timestamp: Date.now() });
+});
 
 /* ─── Audit Log Helper ─── */
 async function logAudit(req: AuthRequest, action: string, entityType: string, entityId?: string, oldValue?: any, newValue?: any) {
@@ -1535,8 +1561,29 @@ app.post('/api/admin/upload', verifyAdmin, upload.single('image'), (req: AuthReq
     res.json({ url, filename: req.file.filename, size: req.file.size });
 });
 
-app.use(express.static(distPath));
+// Cache static assets with hashed filenames for 1 year
+app.use('/assets', express.static(path.join(distPath, 'assets'), {
+    maxAge: '365d',
+    immutable: true,
+}));
+
+// Cache uploads for 7 days
+app.use('/uploads', express.static(path.join(process.cwd(), 'public', 'uploads'), {
+    maxAge: '7d',
+}));
+
+// Other static files (index.html, etc.) — short cache
+app.use(express.static(distPath, {
+    maxAge: '1h',
+    setHeaders: (res, filePath) => {
+        if (filePath.endsWith('.html')) {
+            res.setHeader('Cache-Control', 'no-cache');
+        }
+    },
+}));
+
 app.get('*', (_req: Request, res: Response) => {
+    res.setHeader('Cache-Control', 'no-cache');
     res.sendFile(path.join(distPath, 'index.html'));
 });
 
