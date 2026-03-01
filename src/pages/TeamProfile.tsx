@@ -123,7 +123,7 @@ export default function TeamProfile() {
             <PageSEO title={member.name} description={`${member.name} — ${member.role} at JBLC`} />
 
             {/* ═══ Hero / Profile Header with Animated Background ═══ */}
-            <section className="relative pt-24 pb-16 overflow-hidden">
+            <section className="relative pt-20 pb-12 overflow-hidden">
                 {/* Animated Background Layers */}
                 <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-[#061515] to-[var(--bg-primary)]" />
                 <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_20%,_rgba(20,184,166,0.08)_0%,_transparent_50%)]" />
