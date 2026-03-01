@@ -107,4 +107,19 @@ router.delete('/api/admin/events/:id', verifyAdmin, async (req: AuthRequest, res
     }
 });
 
+// Admin: Purge ALL events (hard delete everything — use with caution)
+router.delete('/api/admin/events/purge/all', verifyAdmin, async (req: AuthRequest, res: Response) => {
+    try {
+        const allEvents = await db.select().from(schema.events);
+        await db.delete(schema.events);
+        await logAudit(req, 'purge_all', 'event', null, { count: allEvents.length }, null);
+        logger.info(`Purged all ${allEvents.length} events from database`);
+        res.json({ success: true, message: `Deleted ${allEvents.length} events` });
+    } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to purge events';
+        logger.error('Failed to purge events', { error: message });
+        res.status(500).json({ success: false, error: message });
+    }
+});
+
 export default router;
