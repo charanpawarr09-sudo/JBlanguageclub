@@ -35,7 +35,7 @@ export default function EventsManager() {
     const fetchEvents = async () => {
         setLoading(true);
         try {
-            const res = await fetch('/api/events', { credentials: 'include' });
+            const res = await fetch(`/api/events?_t=${Date.now()}`, { credentials: 'include', headers: { 'Cache-Control': 'no-cache' } });
             const data = await res.json();
             setEvents(data.filter((e: EventData) => !e.is_archived));
         } catch { showToast('Failed to fetch events'); }
@@ -62,12 +62,12 @@ export default function EventsManager() {
     };
 
     const handleDelete = async (id: string) => {
-        if (!confirm('Archive this event? It will be hidden from the public site.')) return;
+        if (!confirm('Permanently delete this event? This cannot be undone.')) return;
         try {
             const res = await fetch(`/api/admin/events/${id}`, { method: 'DELETE', credentials: 'include' });
             if (!res.ok) { const d = await res.json(); showToast(d.error || 'Failed to archive event'); return; }
-            fetchEvents(); showToast('Event archived');
-        } catch { showToast('Failed to archive event'); }
+            fetchEvents(); showToast('Event deleted');
+        } catch { showToast('Failed to delete event'); }
     };
 
     const toggleStatus = async (event: EventData, field: 'is_published' | 'registration_enabled') => {
