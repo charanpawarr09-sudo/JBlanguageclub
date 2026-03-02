@@ -96,6 +96,40 @@ app.use(contentRoutes);
 app.use(adminRoutes);
 app.use(contactRoutes);
 
+/* ─── Auto Image Search (Pexels proxy) ─── */
+app.get('/api/admin/search-images', verifyAdmin as any, async (req: AuthRequest, res: Response) => {
+    const query = String(req.query.q || '').trim();
+    if (!query) { res.status(400).json({ error: 'Missing search query (?q=...)' }); return; }
+
+    const apiKey = process.env.PEXELS_API_KEY;
+    if (!apiKey) {
+        res.status(503).json({ error: 'PEXELS_API_KEY not configured. Get a free key at https://www.pexels.com/api/' });
+        return;
+    }
+
+    try {
+        const url = `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=9&orientation=landscape`;
+        const response = await fetch(url, { headers: { Authorization: apiKey } });
+        if (!response.ok) {
+            logger.warn('Pexels API error', { status: response.status });
+            res.status(502).json({ error: 'Image search failed' });
+            return;
+        }
+        const data = await response.json() as { photos: Array<{ id: number; src: { large: string; medium: string; landscape: string }; alt: string; photographer: string }> };
+        const images = data.photos.map(p => ({
+            id: p.id,
+            url: p.src.landscape,
+            preview: p.src.medium,
+            alt: p.alt || query,
+            credit: p.photographer,
+        }));
+        res.json({ images, query });
+    } catch (err) {
+        logger.error('Image search error', { error: String(err) });
+        res.status(500).json({ error: 'Image search failed' });
+    }
+});
+
 /* ─── Image Upload Endpoint (with magic byte validation #8) ─── */
 app.post('/api/admin/upload', verifyAdmin as any, upload.single('image'), async (req: AuthRequest, res: Response) => {
     if (!req.file) { res.status(400).json({ error: 'No valid image file provided. Allowed: jpg, png, webp, gif, svg (max 5MB)' }); return; }

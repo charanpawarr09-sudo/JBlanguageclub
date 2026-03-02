@@ -32,13 +32,7 @@ function getParticipationType(form: Partial<EventData>): ParticipationType {
     return 'both';
 }
 
-/** Generate Unsplash image URLs for a search query */
-function generateUnsplashUrls(query: string, count: number, seed: number): string[] {
-    const keywords = encodeURIComponent(query.trim());
-    return Array.from({ length: count }, (_, i) =>
-        `https://source.unsplash.com/featured/800x600/?${keywords}&sig=${seed + i}`
-    );
-}
+interface AutoImage { id: number; url: string; preview: string; alt: string; credit: string; }
 
 /* ─── Image Upload Field ─── */
 function ImageUploadField({ label, value, onChange, type, eventTitle }: { label: string; value: string; onChange: (url: string) => void; type: 'banner' | 'thumbnail'; eventTitle?: string }) {
@@ -49,35 +43,49 @@ function ImageUploadField({ label, value, onChange, type, eventTitle }: { label:
 
     // Auto mode state
     const [autoQuery, setAutoQuery] = useState(eventTitle || '');
-    const [autoSeed, setAutoSeed] = useState(Date.now());
-    const [autoImages, setAutoImages] = useState<string[]>([]);
-    const [autoLoading, setAutoLoading] = useState<boolean[]>([]);
+    const [autoImages, setAutoImages] = useState<AutoImage[]>([]);
+    const [autoSearching, setAutoSearching] = useState(false);
+    const [autoError, setAutoError] = useState('');
     const [selectedAutoUrl, setSelectedAutoUrl] = useState<string | null>(null);
 
     const dimensions = type === 'banner' ? '1600 × 900' : '800 × 530';
 
-    // Update autoQuery when eventTitle changes and we haven't manually typed
+    // Update autoQuery when eventTitle changes
     useEffect(() => {
         if (eventTitle && mode === 'auto') setAutoQuery(eventTitle);
     }, [eventTitle]);
 
-    // Generate images when auto mode activates or seed/query changes
+    // Auto-search when switching to auto mode with a title
     useEffect(() => {
-        if (mode !== 'auto' || !autoQuery.trim()) return;
-        const urls = generateUnsplashUrls(autoQuery, 6, autoSeed);
-        setAutoImages(urls);
-        setAutoLoading(new Array(6).fill(true));
-        setSelectedAutoUrl(null);
-    }, [mode, autoQuery, autoSeed]);
+        if (mode === 'auto' && autoQuery.trim() && autoImages.length === 0 && !autoSearching) {
+            fetchAutoImages(autoQuery);
+        }
+    }, [mode]);
 
-    const handleAutoSearch = () => {
-        if (!autoQuery.trim()) return;
-        setAutoSeed(Date.now()); // triggers re-generation
+    const fetchAutoImages = async (query: string) => {
+        if (!query.trim()) return;
+        setAutoSearching(true);
+        setAutoError('');
+        try {
+            const res = await fetch(`/api/admin/search-images?q=${encodeURIComponent(query)}`, { credentials: 'include' });
+            if (!res.ok) {
+                const d = await res.json().catch(() => ({ error: 'Search failed' }));
+                setAutoError(d.error || 'Search failed');
+                setAutoImages([]);
+                return;
+            }
+            const data = await res.json();
+            setAutoImages(data.images || []);
+            if ((data.images || []).length === 0) setAutoError('No images found. Try different keywords.');
+        } catch {
+            setAutoError('Network error — check connection');
+        } finally {
+            setAutoSearching(false);
+        }
     };
 
-    const handleAutoRefresh = () => {
-        setAutoSeed(Date.now());
-    };
+    const handleAutoSearch = () => fetchAutoImages(autoQuery);
+    const handleAutoRefresh = () => fetchAutoImages(autoQuery);
 
     const handleAutoSelect = (url: string) => {
         setSelectedAutoUrl(url);
@@ -168,7 +176,7 @@ function ImageUploadField({ label, value, onChange, type, eventTitle }: { label:
                     {value && <img src={value} alt="" className="w-10 h-10 object-cover rounded-lg border border-slate-700 flex-shrink-0" />}
                 </div>
             ) : (
-                /* ─── Auto Mode: Unsplash Image Search ─── */
+                /* ─── Auto Mode: Pexels Image Search ─── */
                 <div className="space-y-3">
                     {/* Search bar */}
                     <div className="flex gap-2">
@@ -183,53 +191,61 @@ function ImageUploadField({ label, value, onChange, type, eventTitle }: { label:
                                 className="w-full pl-9 pr-3 py-2.5 bg-slate-950 border border-slate-700 rounded-lg text-white placeholder:text-slate-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all text-sm"
                             />
                         </div>
-                        <button type="button" onClick={handleAutoSearch} className="px-3 py-2.5 bg-purple-600 hover:bg-purple-500 text-white rounded-lg transition-colors" title="Search">
-                            <Search className="w-4 h-4" />
+                        <button type="button" onClick={handleAutoSearch} disabled={autoSearching} className="px-3 py-2.5 bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white rounded-lg transition-colors" title="Search">
+                            {autoSearching ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
                         </button>
-                        <button type="button" onClick={handleAutoRefresh} className="px-3 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition-colors" title="Refresh images">
+                        <button type="button" onClick={handleAutoRefresh} disabled={autoSearching} className="px-3 py-2.5 bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-slate-300 rounded-lg transition-colors" title="Refresh images">
                             <RefreshCw className="w-4 h-4" />
                         </button>
                     </div>
 
-                    {/* Image grid */}
-                    {autoImages.length > 0 ? (
+                    {/* Error state */}
+                    {autoError && (
+                        <div className="p-3 bg-red-950/30 border border-red-900/50 rounded-lg text-sm text-red-400">{autoError}</div>
+                    )}
+
+                    {/* Loading state */}
+                    {autoSearching && (
                         <div className="grid grid-cols-3 gap-2">
-                            {autoImages.map((url, i) => (
+                            {Array.from({ length: 6 }).map((_, i) => (
+                                <div key={i} className="aspect-[4/3] rounded-lg bg-slate-800 animate-pulse" />
+                            ))}
+                        </div>
+                    )}
+
+                    {/* Image grid */}
+                    {!autoSearching && autoImages.length > 0 && (
+                        <div className="grid grid-cols-3 gap-2">
+                            {autoImages.map((img) => (
                                 <button
-                                    key={`${url}-${i}`}
+                                    key={img.id}
                                     type="button"
-                                    onClick={() => handleAutoSelect(url)}
-                                    className={`relative aspect-[4/3] rounded-lg overflow-hidden border-2 transition-all group ${selectedAutoUrl === url
-                                        ? 'border-purple-500 ring-2 ring-purple-500/30 scale-[1.02]'
-                                        : 'border-slate-700 hover:border-purple-400'
+                                    onClick={() => handleAutoSelect(img.url)}
+                                    className={`relative aspect-[4/3] rounded-lg overflow-hidden border-2 transition-all group ${selectedAutoUrl === img.url
+                                            ? 'border-purple-500 ring-2 ring-purple-500/30 scale-[1.02]'
+                                            : 'border-slate-700 hover:border-purple-400'
                                         }`}
                                 >
-                                    {autoLoading[i] && (
-                                        <div className="absolute inset-0 bg-slate-800 animate-pulse flex items-center justify-center">
-                                            <Loader2 className="w-5 h-5 text-slate-600 animate-spin" />
-                                        </div>
-                                    )}
-                                    <img
-                                        src={url}
-                                        alt={`Option ${i + 1}`}
-                                        className="w-full h-full object-cover"
-                                        onLoad={() => setAutoLoading(prev => { const next = [...prev]; next[i] = false; return next; })}
-                                        onError={() => setAutoLoading(prev => { const next = [...prev]; next[i] = false; return next; })}
-                                    />
-                                    {selectedAutoUrl === url && (
+                                    <img src={img.preview} alt={img.alt} className="w-full h-full object-cover" />
+                                    {selectedAutoUrl === img.url && (
                                         <div className="absolute inset-0 bg-purple-500/20 flex items-center justify-center">
                                             <div className="bg-purple-600 text-white text-xs font-bold px-2 py-1 rounded-md shadow-lg">✓ Selected</div>
                                         </div>
                                     )}
-                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
+                                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <p className="text-[10px] text-white/80 truncate">📷 {img.credit}</p>
+                                    </div>
                                 </button>
                             ))}
                         </div>
-                    ) : (
+                    )}
+
+                    {/* Empty state */}
+                    {!autoSearching && autoImages.length === 0 && !autoError && (
                         <div className="border-2 border-dashed border-slate-700 rounded-xl p-6 text-center">
                             <Sparkles className="w-8 h-8 text-purple-500/50 mx-auto mb-2" />
                             <p className="text-sm text-slate-400">Enter a search term and press <span className="text-purple-400 font-medium">Search</span> to find images</p>
-                            <p className="text-xs text-slate-600 mt-1">Powered by Unsplash · Free high-quality images</p>
+                            <p className="text-xs text-slate-600 mt-1">Powered by Pexels · Free high-quality images</p>
                         </div>
                     )}
 
