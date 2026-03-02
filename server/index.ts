@@ -111,6 +111,55 @@ app.post('/api/admin/upload', verifyAdmin as any, upload.single('image'), (req: 
     res.json({ url, filename: req.file.filename, size: req.file.size });
 });
 
+/* ─── Event Image Upload with Auto-Resize ─── */
+app.post('/api/admin/upload-event-image', verifyAdmin as any, upload.single('image'), async (req: AuthRequest, res: Response) => {
+    if (!req.file) { res.status(400).json({ error: 'No valid image file provided. Allowed: jpg, png, webp, gif, svg (max 5MB)' }); return; }
+
+    // Validate magic bytes
+    if (!validateMagicBytes(req.file.path, req.file.mimetype)) {
+        fs.unlinkSync(req.file.path);
+        res.status(400).json({ error: 'File content does not match its declared type. Upload rejected.' });
+        return;
+    }
+
+    const imageType = (req.body?.type || 'thumbnail') as string;
+
+    // Define target dimensions
+    const dimensions = imageType === 'banner'
+        ? { width: 1600, height: 900 }   // 16:9 for detail page hero
+        : { width: 800, height: 530 };    // ~3:2 for event card thumbnail
+
+    try {
+        const sharp = (await import('sharp')).default;
+        const outputName = `${Date.now()}-${Math.random().toString(36).slice(2, 6)}-${imageType}.webp`;
+        const outputPath = path.join(uploadDir, outputName);
+
+        // Read into buffer first to avoid Windows EBUSY file-lock issues
+        const inputBuffer = fs.readFileSync(req.file.path);
+
+        await sharp(inputBuffer)
+            .resize(dimensions.width, dimensions.height, {
+                fit: 'cover',
+                position: 'centre',
+            })
+            .webp({ quality: 82 })
+            .toFile(outputPath);
+
+        // Safely remove original uploaded file
+        try { fs.unlinkSync(req.file.path); } catch { /* ignore cleanup errors */ }
+
+        const url = `/uploads/${outputName}`;
+        const stat = fs.statSync(outputPath);
+        logger.info(`Event image uploaded: ${imageType} → ${outputName} (${stat.size} bytes)`);
+        res.json({ url, filename: outputName, size: stat.size, type: imageType, dimensions });
+    } catch (err) {
+        // Fallback: serve original if resize fails
+        logger.warn('Image resize failed, serving original', { error: String(err) });
+        const url = `/uploads/${req.file.filename}`;
+        res.json({ url, filename: req.file.filename, size: req.file.size, type: imageType, resized: false });
+    }
+});
+
 /* ─── No auto-seeding: events are managed entirely via admin panel ─── */
 
 /* ─── Static Files (Production) ─── */

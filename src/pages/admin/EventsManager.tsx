@@ -1,6 +1,6 @@
-import { useState, useEffect, FormEvent } from 'react';
+import { useState, useEffect, FormEvent, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Plus, Edit, Trash2, Eye, EyeOff, X, Save, Copy, GripVertical, ExternalLink, ChevronDown, ChevronUp, Users } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, EyeOff, X, Save, Copy, GripVertical, Users, Upload, Link2, Loader2, ImageIcon } from 'lucide-react';
 
 interface EventData {
     id: string; title: string; description: string; short_description?: string;
@@ -16,6 +16,106 @@ interface EventData {
     display_order: number;
 }
 
+type ParticipationType = 'single' | 'team' | 'both';
+
+function getParticipationType(form: Partial<EventData>): ParticipationType {
+    const min = form.team_size_min ?? 1;
+    const max = form.team_size_max ?? 1;
+    if (min === 1 && max === 1) return 'single';
+    if (min > 1) return 'team';
+    return 'both';
+}
+
+/* ─── Image Upload Field ─── */
+function ImageUploadField({ label, value, onChange, type }: { label: string; value: string; onChange: (url: string) => void; type: 'banner' | 'thumbnail' }) {
+    const [mode, setMode] = useState<'upload' | 'url'>(value?.startsWith('/uploads') || !value ? 'upload' : 'url');
+    const [uploading, setUploading] = useState(false);
+    const [dragOver, setDragOver] = useState(false);
+    const fileRef = useRef<HTMLInputElement>(null);
+
+    const dimensions = type === 'banner' ? '1600 × 900' : '800 × 530';
+
+    const doUpload = useCallback(async (file: File) => {
+        setUploading(true);
+        try {
+            const form = new FormData();
+            form.append('image', file);
+            form.append('type', type);
+            const res = await fetch('/api/admin/upload-event-image', { method: 'POST', credentials: 'include', body: form });
+            if (!res.ok) { const d = await res.json(); alert(d.error || 'Upload failed'); return; }
+            const data = await res.json();
+            onChange(data.url);
+        } catch { alert('Upload failed — check connection'); }
+        finally { setUploading(false); }
+    }, [type, onChange]);
+
+    const handleDrop = useCallback((e: React.DragEvent) => {
+        e.preventDefault();
+        setDragOver(false);
+        const file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith('image/')) doUpload(file);
+    }, [doUpload]);
+
+    return (
+        <div className="col-span-2">
+            <div className="flex items-center justify-between mb-1.5">
+                <label className="text-sm font-medium text-slate-300">{label}</label>
+                <div className="flex bg-slate-800 rounded-lg p-0.5">
+                    <button type="button" onClick={() => setMode('upload')} className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors flex items-center gap-1 ${mode === 'upload' ? 'bg-teal-600 text-white' : 'text-slate-400 hover:text-white'}`}>
+                        <Upload className="w-3 h-3" /> Upload
+                    </button>
+                    <button type="button" onClick={() => setMode('url')} className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors flex items-center gap-1 ${mode === 'url' ? 'bg-teal-600 text-white' : 'text-slate-400 hover:text-white'}`}>
+                        <Link2 className="w-3 h-3" /> URL
+                    </button>
+                </div>
+            </div>
+
+            {mode === 'upload' ? (
+                <div
+                    onDragOver={e => { e.preventDefault(); setDragOver(true); }}
+                    onDragLeave={() => setDragOver(false)}
+                    onDrop={handleDrop}
+                    onClick={() => !uploading && fileRef.current?.click()}
+                    className={`relative border-2 border-dashed rounded-xl p-4 text-center cursor-pointer transition-all ${dragOver ? 'border-teal-400 bg-teal-500/10' : 'border-slate-700 hover:border-slate-500 bg-slate-950/50'}`}
+                >
+                    <input ref={fileRef} type="file" accept="image/*" className="hidden"
+                        onChange={e => { const f = e.target.files?.[0]; if (f) doUpload(f); e.target.value = ''; }} />
+
+                    {uploading ? (
+                        <div className="flex flex-col items-center gap-2 py-2">
+                            <Loader2 className="w-6 h-6 text-teal-400 animate-spin" />
+                            <span className="text-sm text-teal-300">Resizing to {dimensions}...</span>
+                        </div>
+                    ) : value ? (
+                        <div className="flex items-center gap-3">
+                            <img src={value} alt="Preview" className="w-20 h-14 object-cover rounded-lg border border-slate-700" />
+                            <div className="flex-1 text-left">
+                                <p className="text-sm text-white font-medium truncate">{value.split('/').pop()}</p>
+                                <p className="text-xs text-slate-500">Auto-resized to {dimensions}px · Click to replace</p>
+                            </div>
+                            <button type="button" onClick={e => { e.stopPropagation(); onChange(''); }} className="p-1.5 hover:bg-slate-800 rounded-lg text-slate-500 hover:text-red-400 transition-colors">
+                                <X className="w-4 h-4" />
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="flex flex-col items-center gap-2 py-2">
+                            <ImageIcon className="w-8 h-8 text-slate-600" />
+                            <p className="text-sm text-slate-400">Drop an image here or <span className="text-teal-400 font-medium">click to browse</span></p>
+                            <p className="text-xs text-slate-600">Auto-resized to {dimensions}px · WebP · Max 5MB</p>
+                        </div>
+                    )}
+                </div>
+            ) : (
+                <div className="flex gap-2">
+                    <input type="text" value={value || ''} onChange={e => onChange(e.target.value)} placeholder={`Paste ${type} image URL...`}
+                        className="flex-1 px-3 py-2.5 bg-slate-950 border border-slate-700 rounded-lg text-white placeholder:text-slate-500 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none transition-all text-sm" />
+                    {value && <img src={value} alt="" className="w-10 h-10 object-cover rounded-lg border border-slate-700 flex-shrink-0" />}
+                </div>
+            )}
+        </div>
+    );
+}
+
 export default function EventsManager() {
     const [events, setEvents] = useState<EventData[]>([]);
     const [loading, setLoading] = useState(true);
@@ -25,6 +125,7 @@ export default function EventsManager() {
     const [search, setSearch] = useState('');
     const [filterCategory, setFilterCategory] = useState('all');
     const [toast, setToast] = useState('');
+    const [participationType, setParticipationType] = useState<ParticipationType>('single');
 
     const categories = ['Literary', 'Cultural', 'Informal', 'Management', 'Technical', 'Gaming', 'Workshop', 'Ceremony'];
 
@@ -93,8 +194,30 @@ export default function EventsManager() {
         return matchSearch && matchCat;
     });
 
-    const openEdit = (event: EventData) => { setEditing(event); setForm(event); setIsModalOpen(true); };
-    const openCreate = () => { setEditing(null); setForm({ registration_enabled: true, is_published: false, team_size_min: 1, team_size_max: 1, display_order: 0, registration_fee_single: 0 }); setIsModalOpen(true); };
+    const openEdit = (event: EventData) => {
+        setEditing(event);
+        setForm(event);
+        setParticipationType(getParticipationType(event));
+        setIsModalOpen(true);
+    };
+    const openCreate = () => {
+        setEditing(null);
+        setForm({ registration_enabled: true, is_published: false, team_size_min: 1, team_size_max: 1, display_order: 0, registration_fee_single: 0 });
+        setParticipationType('single');
+        setIsModalOpen(true);
+    };
+
+    const handleParticipationChange = (type: ParticipationType) => {
+        setParticipationType(type);
+        if (type === 'single') {
+            setForm(f => ({ ...f, team_size_min: 1, team_size_max: 1, registration_fee_team: null }));
+        } else if (type === 'team') {
+            setForm(f => ({ ...f, team_size_min: f.team_size_min && f.team_size_min > 1 ? f.team_size_min : 2, team_size_max: f.team_size_max && f.team_size_max > 1 ? f.team_size_max : 4 }));
+        } else {
+            // both
+            setForm(f => ({ ...f, team_size_min: 1, team_size_max: f.team_size_max && f.team_size_max > 1 ? f.team_size_max : 4 }));
+        }
+    };
 
     const inputCls = 'w-full px-3 py-2.5 bg-slate-950 border border-slate-700 rounded-lg text-white placeholder:text-slate-500 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none transition-all';
     const labelCls = 'block text-sm font-medium text-slate-300 mb-1.5';
@@ -139,7 +262,7 @@ export default function EventsManager() {
                             className="flex items-center justify-between p-4 bg-slate-900/50 hover:bg-slate-800/50 rounded-xl border border-slate-800 transition-colors group">
                             <div className="flex items-center gap-4 flex-1 min-w-0">
                                 <GripVertical className="w-4 h-4 text-slate-600 hidden lg:block" />
-                                {event.image && <img src={event.image} alt="" className="w-14 h-14 object-cover rounded-lg flex-shrink-0" />}
+                                {(event.thumbnail_image || event.image) && <img src={event.thumbnail_image || event.image} alt="" className="w-14 h-14 object-cover rounded-lg flex-shrink-0" />}
                                 <div className="min-w-0">
                                     <h3 className="font-semibold text-white truncate">{event.title}</h3>
                                     <div className="flex flex-wrap gap-2 mt-1.5">
@@ -150,6 +273,9 @@ export default function EventsManager() {
                                             {event.registration_enabled ? 'Reg Open' : 'Reg Closed'}
                                         </span>
                                         {event.category && <span className="px-2 py-0.5 rounded text-xs font-medium bg-slate-800 text-slate-400">{event.category}</span>}
+                                        <span className="px-2 py-0.5 rounded text-xs font-medium bg-purple-900/30 text-purple-400">
+                                            {event.team_size_min === 1 && event.team_size_max === 1 ? 'Solo' : event.team_size_min > 1 ? 'Team' : 'Solo/Team'}
+                                        </span>
                                         {event.slots_total && (
                                             <span className="px-2 py-0.5 rounded text-xs font-medium bg-amber-900/30 text-amber-400">
                                                 <Users className="w-3 h-3 inline mr-1" />{event.slots_filled}/{event.slots_total}
@@ -198,20 +324,56 @@ export default function EventsManager() {
                                     <div><label className={labelCls}>Date</label><input type="text" value={form.date || ''} onChange={e => setForm({ ...form, date: e.target.value })} className={inputCls} placeholder="e.g. March 15, 2026" /></div>
                                     <div><label className={labelCls}>Time</label><input type="text" value={form.time || ''} onChange={e => setForm({ ...form, time: e.target.value })} className={inputCls} placeholder="e.g. 10:00 AM" /></div>
                                 </div>
+
+                                {/* ─── Image Upload Fields ─── */}
                                 <div className="grid grid-cols-2 gap-4">
-                                    <div><label className={labelCls}>Banner Image URL</label><input type="text" value={form.banner_image || ''} onChange={e => setForm({ ...form, banner_image: e.target.value })} className={inputCls} /></div>
-                                    <div><label className={labelCls}>Thumbnail URL</label><input type="text" value={form.thumbnail_image || ''} onChange={e => setForm({ ...form, thumbnail_image: e.target.value })} className={inputCls} /></div>
+                                    <ImageUploadField label="Banner Image (Event Detail Hero)" value={form.banner_image || ''} onChange={url => setForm({ ...form, banner_image: url })} type="banner" />
+                                    <ImageUploadField label="Thumbnail Image (Event Card)" value={form.thumbnail_image || ''} onChange={url => setForm({ ...form, thumbnail_image: url })} type="thumbnail" />
                                 </div>
+
+                                {/* ─── Participation Type ─── */}
+                                <div>
+                                    <label className={labelCls}>Participation Type</label>
+                                    <div className="flex gap-2">
+                                        {([
+                                            { value: 'single' as ParticipationType, label: 'Solo Only', desc: 'Individual participation' },
+                                            { value: 'team' as ParticipationType, label: 'Team Only', desc: 'Team required' },
+                                            { value: 'both' as ParticipationType, label: 'Solo + Team', desc: 'Either allowed' },
+                                        ] as const).map(opt => (
+                                            <button key={opt.value} type="button" onClick={() => handleParticipationChange(opt.value)}
+                                                className={`flex-1 p-3 rounded-xl border-2 text-center transition-all ${participationType === opt.value
+                                                    ? 'border-teal-500 bg-teal-500/10'
+                                                    : 'border-slate-700 bg-slate-950 hover:border-slate-600'}`}>
+                                                <p className={`text-sm font-semibold ${participationType === opt.value ? 'text-teal-300' : 'text-slate-300'}`}>{opt.label}</p>
+                                                <p className="text-xs text-slate-500 mt-0.5">{opt.desc}</p>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Fees & Team config */}
                                 <div className="grid grid-cols-3 gap-4">
                                     <div><label className={labelCls}>Solo Fee (₹)</label><input type="number" min={0} value={form.registration_fee_single ?? 0} onChange={e => setForm({ ...form, registration_fee_single: parseInt(e.target.value) })} className={inputCls} /></div>
-                                    <div><label className={labelCls}>Team Fee (₹)</label><input type="number" min={0} value={form.registration_fee_team ?? ''} onChange={e => setForm({ ...form, registration_fee_team: e.target.value ? parseInt(e.target.value) : null })} className={inputCls} placeholder="N/A" /></div>
+                                    {participationType !== 'single' && (
+                                        <div><label className={labelCls}>Team Fee (₹)</label><input type="number" min={0} value={form.registration_fee_team ?? ''} onChange={e => setForm({ ...form, registration_fee_team: e.target.value ? parseInt(e.target.value) : null })} className={inputCls} placeholder="N/A" /></div>
+                                    )}
                                     <div><label className={labelCls}>Total Slots</label><input type="number" min={0} value={form.slots_total ?? ''} onChange={e => setForm({ ...form, slots_total: e.target.value ? parseInt(e.target.value) : null })} className={inputCls} placeholder="Unlimited" /></div>
                                 </div>
-                                <div className="grid grid-cols-3 gap-4">
-                                    <div><label className={labelCls}>Min Team Size</label><input type="number" min={1} value={form.team_size_min ?? 1} onChange={e => setForm({ ...form, team_size_min: parseInt(e.target.value) })} className={inputCls} /></div>
-                                    <div><label className={labelCls}>Max Team Size</label><input type="number" min={1} value={form.team_size_max ?? 1} onChange={e => setForm({ ...form, team_size_max: parseInt(e.target.value) })} className={inputCls} /></div>
-                                    <div><label className={labelCls}>Display Order</label><input type="number" value={form.display_order ?? 0} onChange={e => setForm({ ...form, display_order: parseInt(e.target.value) })} className={inputCls} /></div>
-                                </div>
+                                {participationType !== 'single' && (
+                                    <div className="grid grid-cols-3 gap-4">
+                                        {participationType === 'team' && (
+                                            <div><label className={labelCls}>Min Team Size</label><input type="number" min={2} value={form.team_size_min ?? 2} onChange={e => setForm({ ...form, team_size_min: parseInt(e.target.value) })} className={inputCls} /></div>
+                                        )}
+                                        <div><label className={labelCls}>Max Team Size</label><input type="number" min={2} value={form.team_size_max ?? 4} onChange={e => setForm({ ...form, team_size_max: parseInt(e.target.value) })} className={inputCls} /></div>
+                                        <div><label className={labelCls}>Display Order</label><input type="number" value={form.display_order ?? 0} onChange={e => setForm({ ...form, display_order: parseInt(e.target.value) })} className={inputCls} /></div>
+                                    </div>
+                                )}
+                                {participationType === 'single' && (
+                                    <div className="grid grid-cols-3 gap-4">
+                                        <div><label className={labelCls}>Display Order</label><input type="number" value={form.display_order ?? 0} onChange={e => setForm({ ...form, display_order: parseInt(e.target.value) })} className={inputCls} /></div>
+                                    </div>
+                                )}
+
                                 <div><label className={labelCls}>Google Form URL</label><input type="url" value={form.google_form_url || ''} onChange={e => setForm({ ...form, google_form_url: e.target.value })} className={inputCls} /></div>
                                 <div><label className={labelCls}>Rules (one per line)</label><textarea rows={3} value={Array.isArray(form.rules) ? form.rules.join('\n') : (form.rules || '')} onChange={e => setForm({ ...form, rules: e.target.value.split('\n') })} className={inputCls} /></div>
                                 <div><label className={labelCls}>Judging Criteria (one per line)</label><textarea rows={3} value={Array.isArray(form.judging_criteria) ? form.judging_criteria.join('\n') : (form.judging_criteria || '')} onChange={e => setForm({ ...form, judging_criteria: e.target.value.split('\n') })} className={inputCls} /></div>
@@ -240,3 +402,4 @@ export default function EventsManager() {
         </div>
     );
 }
+
