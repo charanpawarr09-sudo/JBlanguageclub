@@ -155,7 +155,7 @@ app.post('/api/admin/upload-event-image', verifyAdmin as any, upload.single('ima
         const url = `/uploads/${outputName}`;
         const stat = await fs.promises.stat(outputPath);
         logger.info(`Event image uploaded: ${imageType} → ${outputName} (${stat.size} bytes)`);
-        res.json({ url, filename: outputName, size: stat.size, type: imageType, dimensions });
+        res.json({ url, filename: outputName, size: stat.size, type: imageType, dimensions, resized: true });
     } catch (err) {
         // Fallback: serve original if resize fails
         logger.warn('Image resize failed, serving original', { error: String(err) });

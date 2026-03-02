@@ -103,7 +103,7 @@ function ImageUploadField({ label, value, onChange, type }: { label: string; val
                                 <p className="text-sm text-white font-medium truncate">{value.split('/').pop()}</p>
                                 <p className="text-xs text-slate-500">Auto-resized to {dimensions}px · Click to replace</p>
                             </div>
-                            <button type="button" onClick={e => { e.stopPropagation(); onChange(''); }} className="p-1.5 hover:bg-slate-800 rounded-lg text-slate-500 hover:text-red-400 transition-colors">
+                            <button type="button" aria-label="Remove image" onClick={e => { e.stopPropagation(); onChange(''); }} className="p-1.5 hover:bg-slate-800 rounded-lg text-slate-500 hover:text-red-400 transition-colors">
                                 <X className="w-4 h-4" />
                             </button>
                         </div>
