@@ -144,7 +144,7 @@ app.post('/api/admin/upload-event-image', verifyAdmin as any, upload.single('ima
         await sharp(inputBuffer)
             .resize(dimensions.width, dimensions.height, {
                 fit: 'cover',
-                position: 'centre',
+                position: 'attention',  // smart crop: detects faces & focal points automatically
             })
             .webp({ quality: 82 })
             .toFile(outputPath);
