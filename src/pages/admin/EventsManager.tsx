@@ -384,7 +384,10 @@ export default function EventsManager() {
                                     </div>
                                 )}
 
-                                <div><label className={labelCls}>Google Form URL</label><input type="url" value={form.google_form_url || ''} onChange={e => setForm({ ...form, google_form_url: e.target.value })} className={inputCls} /></div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div><label className={labelCls}>Prize</label><input type="text" maxLength={64} value={(form as Record<string, unknown>).prize as string || ''} onChange={e => setForm({ ...form, prize: e.target.value } as typeof form)} className={inputCls} placeholder="e.g. Exciting Gifts + Certificate" /></div>
+                                    <div><label className={labelCls}>Google Form URL</label><input type="url" value={form.google_form_url || ''} onChange={e => setForm({ ...form, google_form_url: e.target.value })} className={inputCls} /></div>
+                                </div>
                                 <div><label className={labelCls}>Rules (one per line)</label><textarea rows={3} value={Array.isArray(form.rules) ? form.rules.join('\n') : (form.rules || '')} onChange={e => setForm({ ...form, rules: e.target.value.split('\n') })} className={inputCls} /></div>
                                 <div><label className={labelCls}>Judging Criteria (one per line)</label><textarea rows={3} value={Array.isArray(form.judging_criteria) ? form.judging_criteria.join('\n') : (form.judging_criteria || '')} onChange={e => setForm({ ...form, judging_criteria: e.target.value.split('\n') })} className={inputCls} /></div>
                                 <div><label className={labelCls}>Coordinators (JSON)</label><textarea rows={3} value={(() => { try { return JSON.stringify(form.coordinators || [], null, 2); } catch { return '[]'; } })()} onChange={e => { try { setForm({ ...form, coordinators: JSON.parse(e.target.value) }); } catch { } }} className={inputCls} placeholder={'[{"name":"Name","role":"Role","phone":"+91 XXXXX"}]'} /></div>
