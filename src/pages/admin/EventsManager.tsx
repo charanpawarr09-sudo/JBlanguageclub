@@ -340,6 +340,24 @@ export default function EventsManager() {
                                     <ImageUploadField label="Banner Image (Event Detail Hero)" value={form.banner_image || ''} onChange={url => setForm({ ...form, banner_image: url })} type="banner" />
                                     <ImageUploadField label="Thumbnail Image (Event Card)" value={form.thumbnail_image || ''} onChange={url => setForm({ ...form, thumbnail_image: url })} type="thumbnail" />
                                 </div>
+                                <div>
+                                    <label className={labelCls}>Banner Focus (Image Position)</label>
+                                    <div className="flex gap-2">
+                                        {([
+                                            { value: 'top', label: '⬆ Top', desc: 'Focus on upper area' },
+                                            { value: 'center', label: '⬛ Center', desc: 'Default center crop' },
+                                            { value: 'bottom', label: '⬇ Bottom', desc: 'Focus on lower area' },
+                                        ] as const).map(opt => (
+                                            <button key={opt.value} type="button" onClick={() => setForm({ ...form, banner_focus: opt.value } as typeof form)}
+                                                className={`flex-1 p-2.5 rounded-xl border-2 text-center transition-all ${(((form as Record<string, unknown>).banner_focus as string) || 'center') === opt.value
+                                                    ? 'border-teal-500 bg-teal-500/10'
+                                                    : 'border-slate-700 bg-slate-950 hover:border-slate-600'}`}>
+                                                <p className={`text-sm font-semibold ${(((form as Record<string, unknown>).banner_focus as string) || 'center') === opt.value ? 'text-teal-300' : 'text-slate-300'}`}>{opt.label}</p>
+                                                <p className="text-xs text-slate-500 mt-0.5">{opt.desc}</p>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
 
                                 {/* ─── Participation Type ─── */}
                                 <fieldset>

@@ -39,6 +39,7 @@ export const events = pgTable('events', {
     image: text('image'),
     banner_image: text('banner_image'),
     thumbnail_image: text('thumbnail_image'),
+    banner_focus: varchar('banner_focus', { length: 32 }).default('center'),
     rules: jsonb('rules').$type<string[]>().default([]),
     team_size: varchar('team_size', { length: 32 }),
     prize: varchar('prize', { length: 64 }),

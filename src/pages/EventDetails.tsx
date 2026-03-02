@@ -152,7 +152,7 @@ export default function EventDetails() {
         <div className="absolute inset-0 bg-gradient-to-r from-slate-950/40 to-transparent z-10" />
         <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-slate-950 to-transparent z-10" />
 
-        <img src={event.banner_image || event.image} alt={event.title} className="w-full h-full object-cover scale-[1.01] select-none" />
+        <img src={event.banner_image || event.image} alt={event.title} className="w-full h-full object-cover scale-[1.01] select-none" style={{ objectPosition: `center ${(event as unknown as Record<string, string>).banner_focus || 'center'}` }} />
 
         {/* Content over banner */}
         <div className="absolute inset-0 z-20 flex items-end pb-14">
