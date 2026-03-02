@@ -30,6 +30,13 @@ router.get('/api/admin/users', verifyAdmin, requireRole('super_admin', 'technica
 router.post('/api/admin/users', verifyAdmin, requireRole('super_admin', 'technical_admin'), async (req: AuthRequest, res: Response) => {
     try {
         const { username, email, password, role } = req.body;
+
+        // Only super_admin can assign super_admin role (prevent privilege escalation)
+        if (role === 'super_admin' && req.admin?.role !== 'super_admin') {
+            res.status(403).json({ error: 'Only super_admin can assign super_admin role' });
+            return;
+        }
+
         const password_hash = await bcrypt.hash(password, 12);
         const [created] = await db.insert(schema.adminUsers).values({
             username, email, password_hash, role: role || 'event_manager',
@@ -45,6 +52,13 @@ router.post('/api/admin/users', verifyAdmin, requireRole('super_admin', 'technic
 router.put('/api/admin/users/:id', verifyAdmin, requireRole('super_admin', 'technical_admin'), async (req: AuthRequest, res: Response) => {
     try {
         const id = parseInt(req.params.id);
+
+        // Only super_admin can assign super_admin role (prevent privilege escalation)
+        if (req.body.role === 'super_admin' && req.admin?.role !== 'super_admin') {
+            res.status(403).json({ error: 'Only super_admin can assign super_admin role' });
+            return;
+        }
+
         const updates: any = {};
         if (req.body.role) updates.role = req.body.role;
         if (req.body.email) updates.email = req.body.email;

@@ -155,8 +155,14 @@ export default function Contact() {
                     {[
                       { icon: Instagram, label: 'Instagram', href: instagramUrl },
                       { icon: Mail, label: 'Email', href: emailUrl },
-                      { icon: MessageSquare, label: 'Chat', href: chatUrl },
-                    ].map((social) => (
+                      ...(chatUrl && chatUrl !== '#' ? [{ icon: MessageSquare, label: 'Chat', href: chatUrl }] : []),
+                    ].filter(social => {
+                      // Validate URL protocol to prevent javascript: injection
+                      try {
+                        const url = social.href;
+                        return url.startsWith('https://') || url.startsWith('http://') || url.startsWith('mailto:') || url.startsWith('tel:');
+                      } catch { return false; }
+                    }).map((social) => (
                       <a
                         key={social.label}
                         href={social.href}

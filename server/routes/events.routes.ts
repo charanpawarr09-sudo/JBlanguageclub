@@ -3,7 +3,7 @@ import { db } from '../db/index';
 import * as schema from '../db/schema';
 import { eq } from 'drizzle-orm';
 import { logger } from '../utils/logger';
-import { verifyAdmin, AuthRequest } from '../middleware/auth.middleware';
+import { verifyAdmin, requireRole, AuthRequest } from '../middleware/auth.middleware';
 import { logAudit, stripTimestampsKeepId, publicCache } from './helpers';
 
 const router = Router();
@@ -93,7 +93,7 @@ router.patch('/api/admin/events/:id/toggle', verifyAdmin, async (req: AuthReques
 });
 
 // Admin: Purge ALL events (hard delete everything — use with caution)
-router.post('/api/admin/purge-events', verifyAdmin, async (req: AuthRequest, res: Response) => {
+router.post('/api/admin/purge-events', verifyAdmin, requireRole('super_admin', 'technical_admin'), async (req: AuthRequest, res: Response) => {
     try {
         const allEvents = await db.select().from(schema.events);
         await db.delete(schema.events);
@@ -107,11 +107,19 @@ router.post('/api/admin/purge-events', verifyAdmin, async (req: AuthRequest, res
     }
 });
 
-// Admin: Delete event (permanent)
+// Admin: Delete event (permanent) — blocked if registrations exist
 router.delete('/api/admin/events/:id', verifyAdmin, async (req: AuthRequest, res: Response) => {
     try {
         const [event] = await db.select().from(schema.events).where(eq(schema.events.id, req.params.id)).limit(1);
         if (!event) { res.status(404).json({ success: false, error: 'Event not found' }); return; }
+
+        // Check for existing registrations before deleting
+        const registrations = await db.select().from(schema.registrations).where(eq(schema.registrations.event_id, req.params.id)).limit(1);
+        if (registrations.length > 0) {
+            res.status(409).json({ success: false, error: 'Cannot delete event with existing registrations. Archive it instead.' });
+            return;
+        }
+
         await db.delete(schema.events).where(eq(schema.events.id, req.params.id));
         await logAudit(req, 'delete', 'event', req.params.id, event, null);
         res.json({ success: true });

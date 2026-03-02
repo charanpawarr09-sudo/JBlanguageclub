@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import Layout from '../components/Layout';
 import { VoxeraEvent } from '../data/events';
+import { normalizeEvent } from '../lib/normalizeEvent';
 import { estimateFee, formatINR } from '../constants/fees';
 import { trackRegistrationStart } from '../lib/analytics';
 import { PageSEO } from '../lib/seo';
@@ -115,11 +116,7 @@ export default function Register() {
       .then((data) => {
         const mapped = data
           .filter((e: Record<string, unknown>) => e.is_published && e.registration_enabled)
-          .map((e: Record<string, unknown>): VoxeraEvent => ({
-            ...e,
-            shortDescription: (e.short_description || e.shortDescription || '') as string,
-            teamSize: (e.team_size || e.teamSize || '') as string,
-          } as VoxeraEvent));
+          .map(normalizeEvent);
         setEvents(mapped);
         setLoadingEvents(false);
       })

@@ -35,13 +35,36 @@
     content="A 2-day college cultural & literary festival by JB Language Club at JBIET. March 16–17, 2026." />
   <meta property="og:image" content="/og-banner.png" />
 
-  <!-- Google Analytics (GA4) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-WNP5FFNRZV"></script>
+  <!-- Google Analytics (GA4) — gated behind consent -->
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag() { dataLayer.push(arguments); }
-    gtag('js', new Date());
-    gtag('config', 'G-WNP5FFNRZV');
+
+    function loadGA4() {
+      if (document.querySelector('script[src*="googletagmanager"]')) return;
+      var s = document.createElement('script');
+      s.async = true;
+      s.src = 'https://www.googletagmanager.com/gtag/js?id=G-WNP5FFNRZV';
+      document.head.appendChild(s);
+      gtag('js', new Date());
+      gtag('config', 'G-WNP5FFNRZV');
+      localStorage.setItem('analytics_consent', 'granted');
+    }
+
+    // Auto-load if user previously consented
+    if (localStorage.getItem('analytics_consent') === 'granted') {
+      loadGA4();
+    } else {
+      // Show consent banner after page loads
+      window.addEventListener('DOMContentLoaded', function () {
+        if (localStorage.getItem('analytics_consent')) return;
+        var banner = document.createElement('div');
+        banner.id = 'cookie-consent';
+        banner.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:#1e293b;color:#e2e8f0;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;z-index:9999;font-size:14px;border-top:1px solid #334155;';
+        banner.innerHTML = '<span>We use cookies for analytics. </span><div style="display:flex;gap:8px"><button onclick="loadGA4();document.getElementById(\'cookie-consent\').remove()" style="padding:6px 16px;background:#14b8a6;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600">Accept</button><button onclick="localStorage.setItem(\'analytics_consent\',\'denied\');this.parentElement.parentElement.remove()" style="padding:6px 16px;background:#334155;color:#94a3b8;border:none;border-radius:8px;cursor:pointer">Decline</button></div>';
+        document.body.appendChild(banner);
+      });
+    }
   </script>
 </head>
 

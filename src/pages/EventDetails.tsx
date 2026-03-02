@@ -5,6 +5,7 @@ import Layout from '../components/Layout';
 import EventCard from '../components/EventCard';
 import { Calendar, Clock, MapPin, Users, Trophy, IndianRupee, Tag, Share2, Copy, CheckCircle, ArrowLeft, Phone, Sparkles, Timer } from 'lucide-react';
 import { VoxeraEvent } from '../data/events';
+import { normalizeEvent } from '../lib/normalizeEvent';
 import { PageSEO } from '../lib/seo';
 import { getDisplayFee } from '../constants/fees';
 import { trackEventView } from '../lib/analytics';
@@ -21,22 +22,16 @@ export default function EventDetails() {
   useEffect(() => {
     window.scrollTo(0, 0);
 
-    const mapEvent = (e: Record<string, unknown>): VoxeraEvent => ({
-      ...e,
-      shortDescription: (e.short_description || e.shortDescription || '') as string,
-      teamSize: (e.team_size || e.teamSize || '') as string,
-    } as VoxeraEvent);
-
     Promise.all([
       fetch(`/api/events/${id}`).then(r => r.ok ? r.json() : null),
       fetch('/api/events').then(r => r.json()).catch((): never[] => []),
     ]).then(([single, all]) => {
       if (single) {
-        const mapped = mapEvent(single);
+        const mapped = normalizeEvent(single);
         setEvent(mapped);
         trackEventView(mapped.id, mapped.title);
       }
-      const allMapped = (Array.isArray(all) ? all : []).filter((e: Record<string, unknown>) => e.is_published).map(mapEvent);
+      const allMapped = (Array.isArray(all) ? all : []).filter((e: Record<string, unknown>) => e.is_published).map(normalizeEvent);
       setAllEvents(allMapped);
       setLoading(false);
     }).catch(() => setLoading(false));
@@ -129,14 +124,14 @@ export default function EventDetails() {
     <Layout>
       <PageSEO title={event.title} description={event.shortDescription} image={event.banner_image || event.image} />
 
-      {/* JSON-LD Structured Data for SEO (#9) */}
+      {/* JSON-LD Structured Data for SEO (#9) — XSS-safe */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{
         __html: JSON.stringify({
           '@context': 'https://schema.org',
           '@type': 'Event',
           name: event.title,
           description: event.shortDescription || event.description,
-          startDate: event.date,
+          startDate: event.date ? (() => { const d = new Date(event.date); return isNaN(d.getTime()) ? event.date : d.toISOString(); })() : undefined,
           location: {
             '@type': 'Place',
             name: event.location || 'JBIET Campus',
@@ -147,7 +142,7 @@ export default function EventDetails() {
           eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
           eventStatus: 'https://schema.org/EventScheduled',
           ...(event.registration_fee_single ? { offers: { '@type': 'Offer', price: event.registration_fee_single, priceCurrency: 'INR', availability: event.registration_enabled ? 'https://schema.org/InStock' : 'https://schema.org/SoldOut' } } : {}),
-        })
+        }).replace(/</g, '\\u003c')
       }} />
 
       {/* ─── Premium Banner ─── */}

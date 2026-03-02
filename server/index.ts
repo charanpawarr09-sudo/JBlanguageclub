@@ -43,9 +43,10 @@ const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 
 /* ─── HTTPS Redirect (Production) ─── */
 if (process.env.NODE_ENV === 'production') {
+    const CANONICAL_HOST = process.env.CANONICAL_HOST || 'jblanguageclub.in';
     app.use((req: Request, res: Response, next: NextFunction) => {
         if (req.headers['x-forwarded-proto'] !== 'https') {
-            return res.redirect(301, `https://${req.hostname}${req.url}`);
+            return res.redirect(301, `https://${CANONICAL_HOST}${req.url}`);
         }
         next();
     });
@@ -115,18 +116,13 @@ app.post('/api/admin/upload', verifyAdmin as any, upload.single('image'), (req: 
 /* ─── Static Files (Production) ─── */
 const distPath = path.resolve(process.cwd(), 'dist');
 
-// Serve uploaded files
-app.use('/uploads', express.static(uploadDir));
+// Serve uploaded files (with 7-day cache)
+app.use('/uploads', express.static(uploadDir, { maxAge: '7d' }));
 
 // Cache static assets with hashed filenames for 1 year
 app.use('/assets', express.static(path.join(distPath, 'assets'), {
     maxAge: '365d',
     immutable: true,
-}));
-
-// Cache uploads for 7 days
-app.use('/uploads', express.static(path.join(process.cwd(), 'public', 'uploads'), {
-    maxAge: '7d',
 }));
 
 // Other static files (index.html, etc.) — short cache

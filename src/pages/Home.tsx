@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import Layout from '../components/Layout';
 import EventCard from '../components/EventCard';
 import { VoxeraEvent } from '../data/events';
+import { normalizeEvent } from '../lib/normalizeEvent';
 import { useCountdown } from '../hooks/useCountdown';
 import { PageSEO } from '../lib/seo';
 import { ArrowRight, ChevronDown, Calendar, Users, Gift, Trophy, CheckCircle2, Sparkles, Zap, Star, MapPin, Award } from 'lucide-react';
@@ -160,11 +161,7 @@ export default function Home() {
     ]).then(([eventsData, settingsData]) => {
       setEvents((eventsData || [])
         .filter((e: Record<string, unknown>) => e.is_published)
-        .map((e: Record<string, unknown>): VoxeraEvent => ({
-          ...e,
-          shortDescription: (e.short_description || e.shortDescription || '') as string,
-          teamSize: (e.team_size || e.teamSize || '') as string,
-        } as VoxeraEvent))
+        .map(normalizeEvent)
         .slice(0, 3));
       setSettings(settingsData || {});
       setLoading(false);

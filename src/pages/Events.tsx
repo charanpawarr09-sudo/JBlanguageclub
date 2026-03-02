@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import Layout from '../components/Layout';
 import EventCard from '../components/EventCard';
 import { VoxeraEvent } from '../data/events';
+import { normalizeEvent } from '../lib/normalizeEvent';
 import { PageSEO } from '../lib/seo';
 import { Search, Filter, Sparkles } from 'lucide-react';
 
@@ -36,11 +37,7 @@ export default function Events() {
       .then((data) => {
         const mapped = data
           .filter((e: Record<string, unknown>) => e.is_published)
-          .map((e: Record<string, unknown>): VoxeraEvent => ({
-            ...e,
-            shortDescription: (e.short_description || e.shortDescription || '') as string,
-            teamSize: (e.team_size || e.teamSize || '') as string,
-          } as VoxeraEvent));
+          .map(normalizeEvent);
         setEvents(mapped);
         setLoading(false);
       })
