@@ -62,12 +62,12 @@ function ImageUploadField({ label, value, onChange, type, eventTitle }: { label:
         }
     }, [mode]);
 
-    const fetchAutoImages = async (query: string) => {
+    const fetchAutoImages = async (query: string, page = 1) => {
         if (!query.trim()) return;
         setAutoSearching(true);
         setAutoError('');
         try {
-            const res = await fetch(`/api/admin/search-images?q=${encodeURIComponent(query)}`, { credentials: 'include' });
+            const res = await fetch(`/api/admin/search-images?q=${encodeURIComponent(query)}&page=${page}`, { credentials: 'include' });
             if (!res.ok) {
                 const d = await res.json().catch(() => ({ error: 'Search failed' }));
                 setAutoError(d.error || 'Search failed');
@@ -84,8 +84,8 @@ function ImageUploadField({ label, value, onChange, type, eventTitle }: { label:
         }
     };
 
-    const handleAutoSearch = () => fetchAutoImages(autoQuery);
-    const handleAutoRefresh = () => fetchAutoImages(autoQuery);
+    const handleAutoSearch = () => fetchAutoImages(autoQuery, 1);
+    const handleAutoRefresh = () => fetchAutoImages(autoQuery, Math.floor(Math.random() * 10) + 2);
 
     const handleAutoSelect = (url: string) => {
         setSelectedAutoUrl(url);
@@ -222,8 +222,8 @@ function ImageUploadField({ label, value, onChange, type, eventTitle }: { label:
                                     type="button"
                                     onClick={() => handleAutoSelect(img.url)}
                                     className={`relative aspect-[4/3] rounded-lg overflow-hidden border-2 transition-all group ${selectedAutoUrl === img.url
-                                            ? 'border-purple-500 ring-2 ring-purple-500/30 scale-[1.02]'
-                                            : 'border-slate-700 hover:border-purple-400'
+                                        ? 'border-purple-500 ring-2 ring-purple-500/30 scale-[1.02]'
+                                        : 'border-slate-700 hover:border-purple-400'
                                         }`}
                                 >
                                     <img src={img.preview} alt={img.alt} className="w-full h-full object-cover" />

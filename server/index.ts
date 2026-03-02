@@ -99,6 +99,7 @@ app.use(contactRoutes);
 /* ─── Auto Image Search (Pexels proxy) ─── */
 app.get('/api/admin/search-images', verifyAdmin as any, async (req: AuthRequest, res: Response) => {
     const query = String(req.query.q || '').trim();
+    const page = Math.max(1, parseInt(String(req.query.page || '1'), 10) || 1);
     if (!query) { res.status(400).json({ error: 'Missing search query (?q=...)' }); return; }
 
     const apiKey = process.env.PEXELS_API_KEY;
@@ -108,7 +109,7 @@ app.get('/api/admin/search-images', verifyAdmin as any, async (req: AuthRequest,
     }
 
     try {
-        const url = `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=9&orientation=landscape`;
+        const url = `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=9&orientation=landscape&page=${page}`;
         const response = await fetch(url, { headers: { Authorization: apiKey } });
         if (!response.ok) {
             logger.warn('Pexels API error', { status: response.status });
