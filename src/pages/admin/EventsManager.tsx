@@ -1,6 +1,6 @@
 import { useState, useEffect, FormEvent, useRef, useCallback, KeyboardEvent } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Plus, Edit, Trash2, Eye, EyeOff, X, Save, Copy, GripVertical, Users, Upload, Link2, Loader2, ImageIcon } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, EyeOff, X, Save, Copy, GripVertical, Users, Upload, Link2, Loader2, ImageIcon, Sparkles, RefreshCw, Search } from 'lucide-react';
 
 /** Parse int with NaN guard — returns fallback when input is empty/invalid */
 const safeInt = (val: string, fallback: number): number => {
@@ -32,14 +32,57 @@ function getParticipationType(form: Partial<EventData>): ParticipationType {
     return 'both';
 }
 
+/** Generate Unsplash image URLs for a search query */
+function generateUnsplashUrls(query: string, count: number, seed: number): string[] {
+    const keywords = encodeURIComponent(query.trim());
+    return Array.from({ length: count }, (_, i) =>
+        `https://source.unsplash.com/featured/800x600/?${keywords}&sig=${seed + i}`
+    );
+}
+
 /* ─── Image Upload Field ─── */
-function ImageUploadField({ label, value, onChange, type }: { label: string; value: string; onChange: (url: string) => void; type: 'banner' | 'thumbnail' }) {
-    const [mode, setMode] = useState<'upload' | 'url'>(value?.startsWith('/uploads') || !value ? 'upload' : 'url');
+function ImageUploadField({ label, value, onChange, type, eventTitle }: { label: string; value: string; onChange: (url: string) => void; type: 'banner' | 'thumbnail'; eventTitle?: string }) {
+    const [mode, setMode] = useState<'upload' | 'url' | 'auto'>(value?.startsWith('/uploads') || !value ? 'upload' : 'url');
     const [uploading, setUploading] = useState(false);
     const [dragOver, setDragOver] = useState(false);
     const fileRef = useRef<HTMLInputElement>(null);
 
+    // Auto mode state
+    const [autoQuery, setAutoQuery] = useState(eventTitle || '');
+    const [autoSeed, setAutoSeed] = useState(Date.now());
+    const [autoImages, setAutoImages] = useState<string[]>([]);
+    const [autoLoading, setAutoLoading] = useState<boolean[]>([]);
+    const [selectedAutoUrl, setSelectedAutoUrl] = useState<string | null>(null);
+
     const dimensions = type === 'banner' ? '1600 × 900' : '800 × 530';
+
+    // Update autoQuery when eventTitle changes and we haven't manually typed
+    useEffect(() => {
+        if (eventTitle && mode === 'auto') setAutoQuery(eventTitle);
+    }, [eventTitle]);
+
+    // Generate images when auto mode activates or seed/query changes
+    useEffect(() => {
+        if (mode !== 'auto' || !autoQuery.trim()) return;
+        const urls = generateUnsplashUrls(autoQuery, 6, autoSeed);
+        setAutoImages(urls);
+        setAutoLoading(new Array(6).fill(true));
+        setSelectedAutoUrl(null);
+    }, [mode, autoQuery, autoSeed]);
+
+    const handleAutoSearch = () => {
+        if (!autoQuery.trim()) return;
+        setAutoSeed(Date.now()); // triggers re-generation
+    };
+
+    const handleAutoRefresh = () => {
+        setAutoSeed(Date.now());
+    };
+
+    const handleAutoSelect = (url: string) => {
+        setSelectedAutoUrl(url);
+        onChange(url);
+    };
 
     const doUpload = useCallback(async (file: File) => {
         setUploading(true);
@@ -72,6 +115,9 @@ function ImageUploadField({ label, value, onChange, type }: { label: string; val
                     </button>
                     <button type="button" onClick={() => setMode('url')} className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors flex items-center gap-1 ${mode === 'url' ? 'bg-teal-600 text-white' : 'text-slate-400 hover:text-white'}`}>
                         <Link2 className="w-3 h-3" /> URL
+                    </button>
+                    <button type="button" onClick={() => { setMode('auto'); if (!autoQuery && eventTitle) setAutoQuery(eventTitle); }} className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors flex items-center gap-1 ${mode === 'auto' ? 'bg-purple-600 text-white' : 'text-slate-400 hover:text-white'}`}>
+                        <Sparkles className="w-3 h-3" /> Auto
                     </button>
                 </div>
             </div>
@@ -115,11 +161,91 @@ function ImageUploadField({ label, value, onChange, type }: { label: string; val
                         </div>
                     )}
                 </div>
-            ) : (
+            ) : mode === 'url' ? (
                 <div className="flex gap-2">
                     <input type="text" value={value || ''} onChange={e => onChange(e.target.value)} placeholder={`Paste ${type} image URL...`}
                         className="flex-1 px-3 py-2.5 bg-slate-950 border border-slate-700 rounded-lg text-white placeholder:text-slate-500 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none transition-all text-sm" />
                     {value && <img src={value} alt="" className="w-10 h-10 object-cover rounded-lg border border-slate-700 flex-shrink-0" />}
+                </div>
+            ) : (
+                /* ─── Auto Mode: Unsplash Image Search ─── */
+                <div className="space-y-3">
+                    {/* Search bar */}
+                    <div className="flex gap-2">
+                        <div className="relative flex-1">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                            <input
+                                type="text"
+                                value={autoQuery}
+                                onChange={e => setAutoQuery(e.target.value)}
+                                onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleAutoSearch(); } }}
+                                placeholder="Search images (e.g. poetry, dance, coding)..."
+                                className="w-full pl-9 pr-3 py-2.5 bg-slate-950 border border-slate-700 rounded-lg text-white placeholder:text-slate-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all text-sm"
+                            />
+                        </div>
+                        <button type="button" onClick={handleAutoSearch} className="px-3 py-2.5 bg-purple-600 hover:bg-purple-500 text-white rounded-lg transition-colors" title="Search">
+                            <Search className="w-4 h-4" />
+                        </button>
+                        <button type="button" onClick={handleAutoRefresh} className="px-3 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition-colors" title="Refresh images">
+                            <RefreshCw className="w-4 h-4" />
+                        </button>
+                    </div>
+
+                    {/* Image grid */}
+                    {autoImages.length > 0 ? (
+                        <div className="grid grid-cols-3 gap-2">
+                            {autoImages.map((url, i) => (
+                                <button
+                                    key={`${url}-${i}`}
+                                    type="button"
+                                    onClick={() => handleAutoSelect(url)}
+                                    className={`relative aspect-[4/3] rounded-lg overflow-hidden border-2 transition-all group ${selectedAutoUrl === url
+                                        ? 'border-purple-500 ring-2 ring-purple-500/30 scale-[1.02]'
+                                        : 'border-slate-700 hover:border-purple-400'
+                                        }`}
+                                >
+                                    {autoLoading[i] && (
+                                        <div className="absolute inset-0 bg-slate-800 animate-pulse flex items-center justify-center">
+                                            <Loader2 className="w-5 h-5 text-slate-600 animate-spin" />
+                                        </div>
+                                    )}
+                                    <img
+                                        src={url}
+                                        alt={`Option ${i + 1}`}
+                                        className="w-full h-full object-cover"
+                                        onLoad={() => setAutoLoading(prev => { const next = [...prev]; next[i] = false; return next; })}
+                                        onError={() => setAutoLoading(prev => { const next = [...prev]; next[i] = false; return next; })}
+                                    />
+                                    {selectedAutoUrl === url && (
+                                        <div className="absolute inset-0 bg-purple-500/20 flex items-center justify-center">
+                                            <div className="bg-purple-600 text-white text-xs font-bold px-2 py-1 rounded-md shadow-lg">✓ Selected</div>
+                                        </div>
+                                    )}
+                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
+                                </button>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="border-2 border-dashed border-slate-700 rounded-xl p-6 text-center">
+                            <Sparkles className="w-8 h-8 text-purple-500/50 mx-auto mb-2" />
+                            <p className="text-sm text-slate-400">Enter a search term and press <span className="text-purple-400 font-medium">Search</span> to find images</p>
+                            <p className="text-xs text-slate-600 mt-1">Powered by Unsplash · Free high-quality images</p>
+                        </div>
+                    )}
+
+                    {/* Selected preview */}
+                    {value && mode === 'auto' && (
+                        <div className="flex items-center gap-3 p-2 bg-slate-950/50 rounded-lg border border-slate-800">
+                            <img src={value} alt="Selected" className="w-16 h-12 object-cover rounded-md border border-slate-700" />
+                            <div className="flex-1 min-w-0">
+                                <p className="text-xs text-purple-400 font-medium">Selected image</p>
+                                <p className="text-xs text-slate-500 truncate">{value}</p>
+                            </div>
+                            <button type="button" onClick={() => { onChange(''); setSelectedAutoUrl(null); }} className="p-1.5 hover:bg-slate-800 rounded-lg text-slate-500 hover:text-red-400 transition-colors">
+                                <X className="w-4 h-4" />
+                            </button>
+                        </div>
+                    )}
                 </div>
             )}
         </div>
@@ -337,8 +463,8 @@ export default function EventsManager() {
 
                                 {/* ─── Image Upload Fields ─── */}
                                 <div className="grid grid-cols-2 gap-4">
-                                    <ImageUploadField label="Banner Image (Event Detail Hero)" value={form.banner_image || ''} onChange={url => setForm({ ...form, banner_image: url })} type="banner" />
-                                    <ImageUploadField label="Thumbnail Image (Event Card)" value={form.thumbnail_image || ''} onChange={url => setForm({ ...form, thumbnail_image: url })} type="thumbnail" />
+                                    <ImageUploadField label="Banner Image (Event Detail Hero)" value={form.banner_image || ''} onChange={url => setForm({ ...form, banner_image: url })} type="banner" eventTitle={form.title || ''} />
+                                    <ImageUploadField label="Thumbnail Image (Event Card)" value={form.thumbnail_image || ''} onChange={url => setForm({ ...form, thumbnail_image: url })} type="thumbnail" eventTitle={form.title || ''} />
                                 </div>
                                 <div>
                                     <label className={labelCls}>Banner Focus (Image Position)</label>
