@@ -97,12 +97,12 @@ app.use(adminRoutes);
 app.use(contactRoutes);
 
 /* ─── Image Upload Endpoint (with magic byte validation #8) ─── */
-app.post('/api/admin/upload', verifyAdmin as any, upload.single('image'), (req: AuthRequest, res: Response) => {
+app.post('/api/admin/upload', verifyAdmin as any, upload.single('image'), async (req: AuthRequest, res: Response) => {
     if (!req.file) { res.status(400).json({ error: 'No valid image file provided. Allowed: jpg, png, webp, gif, svg (max 5MB)' }); return; }
 
     // Validate magic bytes to prevent MIME spoofing (#8)
     if (!validateMagicBytes(req.file.path, req.file.mimetype)) {
-        fs.unlinkSync(req.file.path);
+        await fs.promises.unlink(req.file.path).catch(() => { });
         res.status(400).json({ error: 'File content does not match its declared type. Upload rejected.' });
         return;
     }
@@ -112,17 +112,21 @@ app.post('/api/admin/upload', verifyAdmin as any, upload.single('image'), (req: 
 });
 
 /* ─── Event Image Upload with Auto-Resize ─── */
+const ALLOWED_IMAGE_TYPES = new Set(['banner', 'thumbnail']);
+
 app.post('/api/admin/upload-event-image', verifyAdmin as any, upload.single('image'), async (req: AuthRequest, res: Response) => {
     if (!req.file) { res.status(400).json({ error: 'No valid image file provided. Allowed: jpg, png, webp, gif, svg (max 5MB)' }); return; }
 
     // Validate magic bytes
     if (!validateMagicBytes(req.file.path, req.file.mimetype)) {
-        fs.unlinkSync(req.file.path);
+        await fs.promises.unlink(req.file.path).catch(() => { });
         res.status(400).json({ error: 'File content does not match its declared type. Upload rejected.' });
         return;
     }
 
-    const imageType = (req.body?.type || 'thumbnail') as string;
+    // Whitelist image type to prevent path traversal (#CR-5)
+    const rawType = String(req.body?.type || 'thumbnail');
+    const imageType = ALLOWED_IMAGE_TYPES.has(rawType) ? rawType : 'thumbnail';
 
     // Define target dimensions
     const dimensions = imageType === 'banner'
@@ -135,7 +139,7 @@ app.post('/api/admin/upload-event-image', verifyAdmin as any, upload.single('ima
         const outputPath = path.join(uploadDir, outputName);
 
         // Read into buffer first to avoid Windows EBUSY file-lock issues
-        const inputBuffer = fs.readFileSync(req.file.path);
+        const inputBuffer = await fs.promises.readFile(req.file.path);
 
         await sharp(inputBuffer)
             .resize(dimensions.width, dimensions.height, {
@@ -146,10 +150,10 @@ app.post('/api/admin/upload-event-image', verifyAdmin as any, upload.single('ima
             .toFile(outputPath);
 
         // Safely remove original uploaded file
-        try { fs.unlinkSync(req.file.path); } catch { /* ignore cleanup errors */ }
+        await fs.promises.unlink(req.file.path).catch(() => { });
 
         const url = `/uploads/${outputName}`;
-        const stat = fs.statSync(outputPath);
+        const stat = await fs.promises.stat(outputPath);
         logger.info(`Event image uploaded: ${imageType} → ${outputName} (${stat.size} bytes)`);
         res.json({ url, filename: outputName, size: stat.size, type: imageType, dimensions });
     } catch (err) {

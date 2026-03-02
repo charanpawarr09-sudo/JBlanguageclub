@@ -1,6 +1,12 @@
-import { useState, useEffect, FormEvent, useRef, useCallback } from 'react';
+import { useState, useEffect, FormEvent, useRef, useCallback, KeyboardEvent } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Plus, Edit, Trash2, Eye, EyeOff, X, Save, Copy, GripVertical, Users, Upload, Link2, Loader2, ImageIcon } from 'lucide-react';
+
+/** Parse int with NaN guard — returns fallback when input is empty/invalid */
+const safeInt = (val: string, fallback: number): number => {
+    const n = parseInt(val, 10);
+    return Number.isNaN(n) ? fallback : n;
+};
 
 interface EventData {
     id: string; title: string; description: string; short_description?: string;
@@ -72,11 +78,15 @@ function ImageUploadField({ label, value, onChange, type }: { label: string; val
 
             {mode === 'upload' ? (
                 <div
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Upload ${type} image. Drop an image here or press Enter to browse.`}
                     onDragOver={e => { e.preventDefault(); setDragOver(true); }}
                     onDragLeave={() => setDragOver(false)}
                     onDrop={handleDrop}
                     onClick={() => !uploading && fileRef.current?.click()}
-                    className={`relative border-2 border-dashed rounded-xl p-4 text-center cursor-pointer transition-all ${dragOver ? 'border-teal-400 bg-teal-500/10' : 'border-slate-700 hover:border-slate-500 bg-slate-950/50'}`}
+                    onKeyDown={(e: KeyboardEvent<HTMLDivElement>) => { if ((e.key === 'Enter' || e.key === ' ') && !uploading) { e.preventDefault(); fileRef.current?.click(); } }}
+                    className={`relative border-2 border-dashed rounded-xl p-4 text-center cursor-pointer transition-all focus:outline-none focus:ring-2 focus:ring-teal-500 ${dragOver ? 'border-teal-400 bg-teal-500/10' : 'border-slate-700 hover:border-slate-500 bg-slate-950/50'}`}
                 >
                     <input ref={fileRef} type="file" accept="image/*" className="hidden"
                         onChange={e => { const f = e.target.files?.[0]; if (f) doUpload(f); e.target.value = ''; }} />
@@ -332,15 +342,15 @@ export default function EventsManager() {
                                 </div>
 
                                 {/* ─── Participation Type ─── */}
-                                <div>
-                                    <label className={labelCls}>Participation Type</label>
-                                    <div className="flex gap-2">
+                                <fieldset>
+                                    <legend className={labelCls}>Participation Type</legend>
+                                    <div className="flex gap-2" role="radiogroup" aria-label="Participation type">
                                         {([
                                             { value: 'single' as ParticipationType, label: 'Solo Only', desc: 'Individual participation' },
                                             { value: 'team' as ParticipationType, label: 'Team Only', desc: 'Team required' },
                                             { value: 'both' as ParticipationType, label: 'Solo + Team', desc: 'Either allowed' },
                                         ] as const).map(opt => (
-                                            <button key={opt.value} type="button" onClick={() => handleParticipationChange(opt.value)}
+                                            <button key={opt.value} type="button" role="radio" aria-checked={participationType === opt.value} onClick={() => handleParticipationChange(opt.value)}
                                                 className={`flex-1 p-3 rounded-xl border-2 text-center transition-all ${participationType === opt.value
                                                     ? 'border-teal-500 bg-teal-500/10'
                                                     : 'border-slate-700 bg-slate-950 hover:border-slate-600'}`}>
@@ -349,28 +359,28 @@ export default function EventsManager() {
                                             </button>
                                         ))}
                                     </div>
-                                </div>
+                                </fieldset>
 
                                 {/* Fees & Team config */}
                                 <div className="grid grid-cols-3 gap-4">
-                                    <div><label className={labelCls}>Solo Fee (₹)</label><input type="number" min={0} value={form.registration_fee_single ?? 0} onChange={e => setForm({ ...form, registration_fee_single: parseInt(e.target.value) })} className={inputCls} /></div>
+                                    <div><label className={labelCls}>Solo Fee (₹)</label><input type="number" min={0} value={form.registration_fee_single ?? 0} onChange={e => setForm({ ...form, registration_fee_single: safeInt(e.target.value, 0) })} className={inputCls} /></div>
                                     {participationType !== 'single' && (
-                                        <div><label className={labelCls}>Team Fee (₹)</label><input type="number" min={0} value={form.registration_fee_team ?? ''} onChange={e => setForm({ ...form, registration_fee_team: e.target.value ? parseInt(e.target.value) : null })} className={inputCls} placeholder="N/A" /></div>
+                                        <div><label className={labelCls}>Team Fee (₹)</label><input type="number" min={0} value={form.registration_fee_team ?? ''} onChange={e => setForm({ ...form, registration_fee_team: e.target.value ? safeInt(e.target.value, 0) : null })} className={inputCls} placeholder="N/A" /></div>
                                     )}
-                                    <div><label className={labelCls}>Total Slots</label><input type="number" min={0} value={form.slots_total ?? ''} onChange={e => setForm({ ...form, slots_total: e.target.value ? parseInt(e.target.value) : null })} className={inputCls} placeholder="Unlimited" /></div>
+                                    <div><label className={labelCls}>Total Slots</label><input type="number" min={0} value={form.slots_total ?? ''} onChange={e => setForm({ ...form, slots_total: e.target.value ? safeInt(e.target.value, 0) : null })} className={inputCls} placeholder="Unlimited" /></div>
                                 </div>
                                 {participationType !== 'single' && (
                                     <div className="grid grid-cols-3 gap-4">
                                         {participationType === 'team' && (
-                                            <div><label className={labelCls}>Min Team Size</label><input type="number" min={2} value={form.team_size_min ?? 2} onChange={e => setForm({ ...form, team_size_min: parseInt(e.target.value) })} className={inputCls} /></div>
+                                            <div><label className={labelCls}>Min Team Size</label><input type="number" min={2} value={form.team_size_min ?? 2} onChange={e => setForm({ ...form, team_size_min: safeInt(e.target.value, 2) })} className={inputCls} /></div>
                                         )}
-                                        <div><label className={labelCls}>Max Team Size</label><input type="number" min={2} value={form.team_size_max ?? 4} onChange={e => setForm({ ...form, team_size_max: parseInt(e.target.value) })} className={inputCls} /></div>
-                                        <div><label className={labelCls}>Display Order</label><input type="number" value={form.display_order ?? 0} onChange={e => setForm({ ...form, display_order: parseInt(e.target.value) })} className={inputCls} /></div>
+                                        <div><label className={labelCls}>Max Team Size</label><input type="number" min={2} value={form.team_size_max ?? 4} onChange={e => setForm({ ...form, team_size_max: safeInt(e.target.value, 4) })} className={inputCls} /></div>
+                                        <div><label className={labelCls}>Display Order</label><input type="number" value={form.display_order ?? 0} onChange={e => setForm({ ...form, display_order: safeInt(e.target.value, 0) })} className={inputCls} /></div>
                                     </div>
                                 )}
                                 {participationType === 'single' && (
                                     <div className="grid grid-cols-3 gap-4">
-                                        <div><label className={labelCls}>Display Order</label><input type="number" value={form.display_order ?? 0} onChange={e => setForm({ ...form, display_order: parseInt(e.target.value) })} className={inputCls} /></div>
+                                        <div><label className={labelCls}>Display Order</label><input type="number" value={form.display_order ?? 0} onChange={e => setForm({ ...form, display_order: safeInt(e.target.value, 0) })} className={inputCls} /></div>
                                     </div>
                                 )}
 
