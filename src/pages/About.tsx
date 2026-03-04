@@ -276,7 +276,8 @@ VOXERA' 26 marks the exciting debut of a brand-new literary fiesta, created to b
                                                                     src={member.photo_url}
                                                                     alt={member.name}
                                                                     className="w-full h-full object-cover block"
-                                                                    style={{ objectPosition: `center ${member.photo_position || 'center'}` }}
+                                                                    style={{ objectPosition: `center ${member.photo_position || 'center'}`, imageRendering: 'auto', WebkitFontSmoothing: 'antialiased' }}
+                                                                    loading="eager"
                                                                 />
                                                             ) : (
                                                                 <div className="w-full h-full bg-gradient-to-br from-teal-600 via-teal-700 to-emerald-800 flex items-center justify-center text-white text-5xl sm:text-6xl font-bold">

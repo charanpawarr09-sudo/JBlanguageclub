@@ -146,7 +146,16 @@ app.post('/api/admin/upload', verifyAdmin as any, upload.single('image'), async 
     // Upload to Cloudinary if configured, else use local disk
     if (isCloudinaryConfigured()) {
         try {
-            const result = await uploadToCloudinary(req.file.path, { folder: 'jblc/team' });
+            const result = await uploadToCloudinary(req.file.path, {
+                folder: 'jblc/team',
+                transformation: {
+                    width: 600,
+                    height: 600,
+                    crop: 'fill',
+                    quality: 90,
+                    format: 'webp',
+                },
+            });
             // Clean up local temp file
             await fs.promises.unlink(req.file.path).catch(() => { });
             res.json({ url: result.url, filename: result.publicId, size: result.bytes });
