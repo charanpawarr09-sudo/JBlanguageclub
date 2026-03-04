@@ -23,6 +23,7 @@
     "@types/multer": "^2.0.0",
     "@vitejs/plugin-react": "^5.0.4",
     "bcryptjs": "^2.4.3",
+    "cloudinary": "^2.9.0",
     "clsx": "^2.1.1",
     "compression": "^1.7.4",
     "cookie-parser": "^1.4.6",
@@ -44,9 +45,9 @@
     "react-helmet-async": "^2.0.5",
     "react-router-dom": "^7.13.0",
     "resend": "^4.0.1",
+    "sharp": "^0.34.5",
     "tailwind-merge": "^2.5.5",
     "tsx": "^4.21.0",
-    "sharp": "^0.34.5",
     "zod": "^3.23.8",
     "zustand": "^4.5.5"
   },

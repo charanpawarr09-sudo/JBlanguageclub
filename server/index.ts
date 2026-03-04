@@ -13,6 +13,7 @@ import { logger } from './utils/logger';
 import { generalLimiter } from './middleware/rateLimiter';
 import { verifyAdmin, AuthRequest } from './middleware/auth.middleware';
 import { upload, uploadDir, validateMagicBytes } from './routes/helpers';
+import { isCloudinaryConfigured, uploadToCloudinary } from './utils/cloudinary';
 
 // Route modules
 import authRoutes from './routes/auth.routes';
@@ -142,6 +143,19 @@ app.post('/api/admin/upload', verifyAdmin as any, upload.single('image'), async 
         return;
     }
 
+    // Upload to Cloudinary if configured, else use local disk
+    if (isCloudinaryConfigured()) {
+        try {
+            const result = await uploadToCloudinary(req.file.path, { folder: 'jblc/team' });
+            // Clean up local temp file
+            await fs.promises.unlink(req.file.path).catch(() => { });
+            res.json({ url: result.url, filename: result.publicId, size: result.bytes });
+            return;
+        } catch (err) {
+            logger.warn('Cloudinary upload failed, falling back to local', { error: String(err) });
+        }
+    }
+
     const url = `/uploads/${req.file.filename}`;
     res.json({ url, filename: req.file.filename, size: req.file.size });
 });
@@ -168,6 +182,29 @@ app.post('/api/admin/upload-event-image', verifyAdmin as any, upload.single('ima
         ? { width: 1600, height: 900 }   // 16:9 for detail page hero
         : { width: 800, height: 530 };    // ~3:2 for event card thumbnail
 
+    // Upload to Cloudinary if configured
+    if (isCloudinaryConfigured()) {
+        try {
+            const result = await uploadToCloudinary(req.file.path, {
+                folder: `jblc/events/${imageType}`,
+                transformation: {
+                    width: dimensions.width,
+                    height: dimensions.height,
+                    crop: 'fill',
+                    quality: 82,
+                    format: 'webp',
+                },
+            });
+            // Clean up local temp file
+            await fs.promises.unlink(req.file.path).catch(() => { });
+            res.json({ url: result.url, filename: result.publicId, size: result.bytes, type: imageType, dimensions, resized: true });
+            return;
+        } catch (err) {
+            logger.warn('Cloudinary upload failed, falling back to local', { error: String(err) });
+        }
+    }
+
+    // Fallback: local Sharp resize
     try {
         const sharp = (await import('sharp')).default;
         const outputName = `${Date.now()}-${Math.random().toString(36).slice(2, 6)}-${imageType}.webp`;
