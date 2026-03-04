@@ -245,6 +245,7 @@ export default function TeamManager() {
                                 </div>
                                 <div><label className="block text-sm font-medium text-slate-300 mb-1.5">Display Order</label><input type="number" value={form.display_order ?? 0} onChange={e => setForm({ ...form, display_order: parseInt(e.target.value) })} className={inputCls} /></div>
                                 <label className="flex items-center gap-2 cursor-pointer"><input type="checkbox" checked={form.is_active ?? true} onChange={e => setForm({ ...form, is_active: e.target.checked })} className="w-4 h-4 rounded" /><span className="text-sm text-slate-300">Active</span></label>
+                                <label className="flex items-center gap-2 cursor-pointer"><input type="checkbox" checked={(form as any).is_founder ?? false} onChange={e => setForm({ ...form, is_founder: e.target.checked } as any)} className="w-4 h-4 rounded" /><span className="text-sm text-slate-300">⭐ Founder / Lead (special profile card on About page)</span></label>
                                 <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
                                     <button type="button" onClick={() => setIsModalOpen(false)} className="px-5 py-2.5 text-slate-400 hover:text-white">Cancel</button>
                                     <button type="submit" className="px-6 py-2.5 bg-gradient-to-r from-teal-600 to-emerald-700 text-white font-semibold rounded-xl flex items-center gap-2"><Save className="w-4 h-4" /> Save</button>

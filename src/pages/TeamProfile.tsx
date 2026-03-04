@@ -27,6 +27,7 @@ interface TeamMember {
     skills?: string;
     year_branch?: string;
     motto?: string;
+    is_founder?: boolean;
 }
 
 function getInitials(name: string): string {
@@ -198,7 +199,16 @@ export default function TeamProfile() {
                             </div>
 
                             {/* Role Badge */}
-                            <div className="text-center">
+                            <div className="text-center space-y-2">
+                                {member.is_founder && (
+                                    <motion.span
+                                        className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-gradient-to-r from-amber-500/20 to-teal-500/20 border border-amber-500/30 text-amber-400 text-xs font-bold"
+                                        animate={{ boxShadow: ['0 0 0 0 rgba(245,158,11,0)', '0 0 12px 2px rgba(245,158,11,0.2)', '0 0 0 0 rgba(245,158,11,0)'] }}
+                                        transition={{ duration: 3, repeat: Infinity }}
+                                    >
+                                        <Star className="w-3.5 h-3.5" /> Founder & Lead
+                                    </motion.span>
+                                )}
                                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-500/10 border border-teal-500/20 text-teal-400 text-xs font-medium">
                                     <Sparkles className="w-3 h-3" /> {member.dept_group || 'JBLC'}
                                 </span>

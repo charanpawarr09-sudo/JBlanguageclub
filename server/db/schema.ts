@@ -131,6 +131,7 @@ export const teamMembers = pgTable('team_members', {
     skills: text('skills'),
     year_branch: varchar('year_branch', { length: 128 }),
     motto: varchar('motto', { length: 256 }),
+    is_founder: boolean('is_founder').notNull().default(false),
     is_active: boolean('is_active').notNull().default(true),
     is_archived: boolean('is_archived').notNull().default(false),
     created_at: timestamp('created_at').defaultNow(),

@@ -111,6 +111,7 @@ export const teamMemberSchema = z.object({
     year_branch: z.string().max(128).optional(),
     motto: z.string().max(256).optional(),
     is_active: z.boolean().optional(),
+    is_founder: z.boolean().optional(),
 }).passthrough();
 
 export const loginSchema = z.object({

@@ -14,14 +14,15 @@ const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-me';
 
 router.post('/api/auth/login', authLimiter, validate(loginSchema), async (req: Request, res: Response) => {
-    const { username, password } = req.body;
+    const username = (req.body.username || '').trim();
+    const password = req.body.password;
 
     try {
         let userRole = 'super_admin';
 
         // Check env-based admin first
         const adminHash = process.env.ADMIN_PASSWORD_HASH;
-        const adminUsername = process.env.ADMIN_USERNAME || 'admin';
+        const adminUsername = (process.env.ADMIN_USERNAME || 'admin').trim();
 
         if (username === adminUsername && adminHash) {
             const match = await bcrypt.compare(password, adminHash);
@@ -32,24 +33,30 @@ router.post('/api/auth/login', authLimiter, validate(loginSchema), async (req: R
             userRole = 'super_admin';
         } else {
             // Check DB admin users
-            try {
-                const [user] = await db.select().from(schema.adminUsers).where(eq(schema.adminUsers.username, username)).limit(1);
-                if (!user || !(await bcrypt.compare(password, user.password_hash))) {
-                    res.status(401).json({ error: 'Invalid credentials' });
-                    return;
-                }
-                if (!user.is_active) {
-                    res.status(403).json({ error: 'Account is deactivated' });
-                    return;
-                }
-                userRole = user.role;
+            const [user] = await db.select().from(schema.adminUsers).where(eq(schema.adminUsers.username, username)).limit(1);
 
-                // Update last_login_at
-                await db.update(schema.adminUsers).set({ last_login_at: new Date() } as any).where(eq(schema.adminUsers.id, user.id));
-            } catch {
+            if (!user) {
+                logger.warn('Login failed: user not found', { username });
                 res.status(401).json({ error: 'Invalid credentials' });
                 return;
             }
+
+            const passwordMatch = await bcrypt.compare(password, user.password_hash);
+            if (!passwordMatch) {
+                logger.warn('Login failed: wrong password', { username });
+                res.status(401).json({ error: 'Invalid credentials' });
+                return;
+            }
+
+            if (!user.is_active) {
+                res.status(403).json({ error: 'Account is deactivated' });
+                return;
+            }
+
+            userRole = user.role;
+
+            // Update last_login_at
+            await db.update(schema.adminUsers).set({ last_login_at: new Date() } as any).where(eq(schema.adminUsers.id, user.id));
         }
 
         const token = jwt.sign({ username, role: userRole }, JWT_SECRET, { expiresIn: '24h' });

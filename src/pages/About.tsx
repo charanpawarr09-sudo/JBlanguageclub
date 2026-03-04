@@ -14,6 +14,7 @@ interface TeamMember {
     photo_url?: string;
     photo_position?: string;
     dept_group?: string;
+    is_founder?: boolean;
 }
 
 interface PastEventItem {
@@ -69,6 +70,10 @@ export default function About() {
     })();
 
     const years = [...new Set<string>(pastEvents.map((e: { year: string }) => e.year))].sort().reverse();
+
+    // Split team into founders and regular members
+    const founders = team.filter(m => m.is_founder);
+    const regularMembers = team.filter(m => !m.is_founder);
 
     return (
         <Layout>
@@ -205,41 +210,131 @@ VOXERA' 26 marks the exciting debut of a brand-new literary fiesta, created to b
                             ))}
                         </div>
                     ) : team.length > 0 ? (
-                        <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                            {team.map((member, i) => (
-                                <Link to={`/about/team/${member.id}`} key={member.id}>
-                                    <motion.div
-                                        className="group relative rounded-2xl border border-white/[0.06] bg-white/[0.02] backdrop-blur-sm p-6 text-center hover:border-teal-500/30 hover:bg-teal-500/[0.04] transition-all duration-300 hover:scale-[1.03] cursor-pointer"
-                                        initial={{ opacity: 0, y: 20 }}
-                                        whileInView={{ opacity: 1, y: 0 }}
+                        <>
+                            {/* ═══ Founder / Lead Spotlight ═══ */}
+                            {founders.length > 0 && (
+                                <div className="mb-12">
+                                    <motion.p
+                                        className="text-center text-slate-500 text-xs uppercase tracking-[0.2em] font-medium mb-8"
+                                        initial={{ opacity: 0 }}
+                                        whileInView={{ opacity: 1 }}
                                         viewport={{ once: true }}
-                                        transition={{ delay: i * 0.06 }}
                                     >
-                                        {/* Avatar */}
-                                        <div className="relative mx-auto mb-4">
-                                            <div className="absolute -inset-1 rounded-full bg-gradient-to-br from-teal-500/30 to-amber-500/30 opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-300" />
-                                            {member.photo_url ? (
-                                                <img
-                                                    src={member.photo_url}
-                                                    alt={member.name}
-                                                    className="relative w-20 h-20 rounded-full object-cover border-2 border-teal-500/20 mx-auto"
-                                                    style={{ objectPosition: `center ${member.photo_position || 'center'}` }}
-                                                />
-                                            ) : (
-                                                <div className="relative w-20 h-20 rounded-full bg-gradient-to-br from-teal-600 to-teal-800 flex items-center justify-center text-white text-xl font-bold mx-auto border-2 border-teal-500/20">
-                                                    {getInitials(member.name)}
-                                                </div>
-                                            )}
-                                        </div>
+                                        ★ Leadership ★
+                                    </motion.p>
+                                    <div className={`grid gap-8 justify-items-center ${founders.length === 1 ? 'max-w-md mx-auto' : founders.length === 2 ? 'sm:grid-cols-2 max-w-3xl mx-auto' : 'sm:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto'}`}>
+                                        {founders.map((member, i) => (
+                                            <Link to={`/about/team/${member.id}`} key={member.id} className="w-full">
+                                                <motion.div
+                                                    className="group relative rounded-3xl p-[1px] bg-gradient-to-br from-teal-500/60 via-amber-500/40 to-teal-500/60 hover:from-teal-400/80 hover:via-amber-400/60 hover:to-teal-400/80 transition-all duration-500 cursor-pointer"
+                                                    initial={{ opacity: 0, y: 30 }}
+                                                    whileInView={{ opacity: 1, y: 0 }}
+                                                    viewport={{ once: true }}
+                                                    transition={{ delay: i * 0.15, duration: 0.6 }}
+                                                >
+                                                    {/* Glow effect */}
+                                                    <div className="absolute -inset-2 bg-gradient-to-br from-teal-500/20 via-amber-500/10 to-teal-500/20 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-                                        <h3 className="text-white font-semibold text-lg mb-1">{member.name}</h3>
-                                        <p className="text-teal-400 text-sm font-medium">{member.role}</p>
-                                        {member.designation && <p className="text-slate-500 text-xs mt-1">{member.designation}</p>}
-                                        <span className="inline-block mt-3 text-xs text-slate-500 group-hover:text-teal-400 transition-colors">View Profile →</span>
-                                    </motion.div>
-                                </Link>
-                            ))}
-                        </div>
+                                                    <div className="relative rounded-3xl bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 p-8 text-center overflow-hidden">
+                                                        {/* Subtle inner glow */}
+                                                        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-32 bg-gradient-to-b from-teal-500/[0.06] to-transparent rounded-full blur-2xl" />
+
+                                                        {/* Badge */}
+                                                        <motion.div
+                                                            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-amber-500/20 to-teal-500/20 border border-amber-500/30 text-amber-400 text-xs font-semibold mb-5 relative"
+                                                            animate={{ boxShadow: ['0 0 0 0 rgba(245,158,11,0)', '0 0 12px 2px rgba(245,158,11,0.15)', '0 0 0 0 rgba(245,158,11,0)'] }}
+                                                            transition={{ duration: 3, repeat: Infinity }}
+                                                        >
+                                                            <Star className="w-3 h-3" /> Founder & Lead
+                                                        </motion.div>
+
+                                                        {/* Avatar */}
+                                                        <div className="relative mx-auto mb-5">
+                                                            <div className="absolute -inset-2 rounded-full bg-gradient-to-br from-teal-500/40 via-amber-500/30 to-teal-500/40 blur-lg opacity-60 group-hover:opacity-100 transition-opacity duration-500" />
+                                                            <div className="absolute -inset-0.5 rounded-full bg-gradient-to-br from-teal-500 to-amber-500 p-[2px]">
+                                                                <div className="w-full h-full rounded-full bg-slate-900" />
+                                                            </div>
+                                                            {member.photo_url ? (
+                                                                <img
+                                                                    src={member.photo_url}
+                                                                    alt={member.name}
+                                                                    className="relative w-28 h-28 rounded-full object-cover border-2 border-transparent mx-auto"
+                                                                    style={{ objectPosition: `center ${member.photo_position || 'center'}` }}
+                                                                />
+                                                            ) : (
+                                                                <div className="relative w-28 h-28 rounded-full bg-gradient-to-br from-teal-600 to-teal-800 flex items-center justify-center text-white text-3xl font-bold mx-auto border-2 border-transparent">
+                                                                    {getInitials(member.name)}
+                                                                </div>
+                                                            )}
+                                                        </div>
+
+                                                        <h3 className="text-xl font-bold text-white mb-1 relative" style={{ fontFamily: 'var(--font-display)' }}>{member.name}</h3>
+                                                        <p className="text-teal-400 text-sm font-medium mb-1 relative">{member.role}</p>
+                                                        {member.designation && <p className="text-slate-500 text-xs mb-3 relative">{member.designation}</p>}
+                                                        {member.dept_group && (
+                                                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-teal-500/10 border border-teal-500/20 text-teal-400 text-xs font-medium relative">
+                                                                {member.dept_group}
+                                                            </span>
+                                                        )}
+                                                        <div className="mt-4 relative">
+                                                            <span className="text-xs text-slate-500 group-hover:text-amber-400 transition-colors">View Full Profile →</span>
+                                                        </div>
+                                                    </div>
+                                                </motion.div>
+                                            </Link>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* ═══ Regular Team Members ═══ */}
+                            {regularMembers.length > 0 && (
+                                <>
+                                    {founders.length > 0 && (
+                                        <div className="flex items-center gap-4 mb-8 mt-4">
+                                            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-slate-700 to-transparent" />
+                                            <span className="text-slate-500 text-xs uppercase tracking-[0.2em] font-medium">Core Team</span>
+                                            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-slate-700 to-transparent" />
+                                        </div>
+                                    )}
+                                    <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                                        {regularMembers.map((member, i) => (
+                                            <Link to={`/about/team/${member.id}`} key={member.id}>
+                                                <motion.div
+                                                    className="group relative rounded-2xl border border-white/[0.06] bg-white/[0.02] backdrop-blur-sm p-6 text-center hover:border-teal-500/30 hover:bg-teal-500/[0.04] transition-all duration-300 hover:scale-[1.03] cursor-pointer"
+                                                    initial={{ opacity: 0, y: 20 }}
+                                                    whileInView={{ opacity: 1, y: 0 }}
+                                                    viewport={{ once: true }}
+                                                    transition={{ delay: i * 0.06 }}
+                                                >
+                                                    {/* Avatar */}
+                                                    <div className="relative mx-auto mb-4">
+                                                        <div className="absolute -inset-1 rounded-full bg-gradient-to-br from-teal-500/30 to-amber-500/30 opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-300" />
+                                                        {member.photo_url ? (
+                                                            <img
+                                                                src={member.photo_url}
+                                                                alt={member.name}
+                                                                className="relative w-20 h-20 rounded-full object-cover border-2 border-teal-500/20 mx-auto"
+                                                                style={{ objectPosition: `center ${member.photo_position || 'center'}` }}
+                                                            />
+                                                        ) : (
+                                                            <div className="relative w-20 h-20 rounded-full bg-gradient-to-br from-teal-600 to-teal-800 flex items-center justify-center text-white text-xl font-bold mx-auto border-2 border-teal-500/20">
+                                                                {getInitials(member.name)}
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    <h3 className="text-white font-semibold text-lg mb-1">{member.name}</h3>
+                                                    <p className="text-teal-400 text-sm font-medium">{member.role}</p>
+                                                    {member.designation && <p className="text-slate-500 text-xs mt-1">{member.designation}</p>}
+                                                    <span className="inline-block mt-3 text-xs text-slate-500 group-hover:text-teal-400 transition-colors">View Profile →</span>
+                                                </motion.div>
+                                            </Link>
+                                        ))}
+                                    </div>
+                                </>
+                            )}
+                        </>
                     ) : (
                         <div className="text-center py-16">
                             <Sparkles className="w-12 h-12 text-teal-600 mx-auto mb-4" />
