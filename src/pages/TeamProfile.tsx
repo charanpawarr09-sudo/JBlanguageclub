@@ -178,30 +178,29 @@ export default function TeamProfile() {
                             </motion.div>
                         )}
 
-                        {/* Avatar — premium design */}
+                        {/* Avatar */}
                         <motion.div
                             className="relative inline-block mb-10"
                             initial={{ opacity: 0, scale: 0.85 }}
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ duration: 0.7, type: 'spring', bounce: 0.3 }}
                         >
-                            {/* Outer glow ring */}
                             <div className="absolute -inset-4 rounded-full bg-gradient-to-br from-teal-500/30 via-emerald-500/20 to-amber-500/25 blur-2xl" />
-
-                            {/* Gradient ring — wraps photo */}
-                            <div className="relative rounded-full p-[3px]" style={{ background: 'linear-gradient(135deg, #14b8a6, #f59e0b, #8b5cf6, #14b8a6)' }}>
-                                {member.photo_url ? (
-                                    <img
-                                        src={member.photo_url}
-                                        alt={member.name}
-                                        className="w-44 h-44 sm:w-52 sm:h-52 rounded-full object-cover block"
-                                        style={{ objectPosition: `center ${member.photo_position || 'center'}` }}
-                                    />
-                                ) : (
-                                    <div className="w-44 h-44 sm:w-52 sm:h-52 rounded-full bg-gradient-to-br from-teal-600 via-teal-700 to-emerald-800 flex items-center justify-center text-white text-6xl font-bold">
-                                        {getInitials(member.name)}
-                                    </div>
-                                )}
+                            <div className="relative rounded-full p-[3px] overflow-hidden" style={{ background: 'linear-gradient(135deg, #14b8a6, #f59e0b, #8b5cf6, #14b8a6)' }}>
+                                <div className="rounded-full overflow-hidden">
+                                    {member.photo_url ? (
+                                        <img
+                                            src={member.photo_url}
+                                            alt={member.name}
+                                            className="w-44 h-44 sm:w-52 sm:h-52 object-cover block"
+                                            style={{ objectPosition: `center ${member.photo_position || 'center'}` }}
+                                        />
+                                    ) : (
+                                        <div className="w-44 h-44 sm:w-52 sm:h-52 bg-gradient-to-br from-teal-600 via-teal-700 to-emerald-800 flex items-center justify-center text-white text-6xl font-bold">
+                                            {getInitials(member.name)}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </motion.div>
 
