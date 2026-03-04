@@ -18,6 +18,7 @@ interface TeamMember {
     photo_position?: string;
     dept_group?: string;
     instagram_url?: string;
+    instagram_handle?: string;
     email?: string;
     phone?: string;
     bio?: string;
@@ -291,7 +292,7 @@ export default function TeamProfile() {
                             )}
                             {member.instagram_url && (
                                 <a href={member.instagram_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-white/[0.04] border border-white/[0.08] hover:border-pink-500/40 hover:bg-pink-500/[0.06] text-slate-300 hover:text-white transition-all duration-300 text-sm font-medium group">
-                                    <Instagram className="w-4 h-4 text-pink-400 group-hover:scale-110 transition-transform" /> Instagram
+                                    <Instagram className="w-4 h-4 text-pink-400 group-hover:scale-110 transition-transform" /> {member.instagram_handle || member.instagram_url!.replace(/^https?:\/\/(www\.)?instagram\.com\//i, '@').replace(/\/+$/, '')}
                                 </a>
                             )}
                         </motion.div>
@@ -337,9 +338,16 @@ export default function TeamProfile() {
                                     <div className="text-white font-bold text-sm">{member.dept_group}</div>
                                 </div>
                             )}
-                            {monthsSince > 0 && (
+                            {member.designation && (
                                 <div className="group p-6 rounded-3xl text-center transition-all duration-500 hover:scale-105" style={{ background: 'linear-gradient(135deg, rgba(236,72,153,0.06), rgba(236,72,153,0.02))', border: '1px solid rgba(236,72,153,0.12)' }}>
-                                    <Zap className="w-6 h-6 text-pink-400 mx-auto mb-3 group-hover:scale-110 transition-transform" />
+                                    <Award className="w-6 h-6 text-pink-400 mx-auto mb-3 group-hover:scale-110 transition-transform" />
+                                    <div className="text-xs text-slate-500 uppercase tracking-[0.15em] mb-1 font-medium">Role</div>
+                                    <div className="text-white font-bold text-sm">{member.designation}</div>
+                                </div>
+                            )}
+                            {monthsSince > 0 && (
+                                <div className="group p-6 rounded-3xl text-center transition-all duration-500 hover:scale-105" style={{ background: 'linear-gradient(135deg, rgba(14,165,233,0.06), rgba(14,165,233,0.02))', border: '1px solid rgba(14,165,233,0.12)' }}>
+                                    <Zap className="w-6 h-6 text-sky-400 mx-auto mb-3 group-hover:scale-110 transition-transform" />
                                     <div className="text-xs text-slate-500 uppercase tracking-[0.15em] mb-1 font-medium">Active</div>
                                     <div className="text-white font-bold text-sm">{monthsSince} months</div>
                                 </div>

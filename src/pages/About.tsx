@@ -133,7 +133,7 @@ export default function About() {
 
 VOXERA was born from the idea that every student has a voice worth hearing. Whether it's through the structured logic of a debate, the raw emotion of poetry, the creative spark of a startup pitch, or the thrill of a campus-wide treasure hunt — VOXERA is the stage where all forms of expression converge.
 
-VOXERA' 26 marks the exciting debut of a brand-new literary fiesta, created to bring together talent, expression, and innovation on one dynamic platform. Exciting gifts, 6 competitive events, distinguished judges, and an immersive 2-day experience, VOXERA begins its journey with the ambition to redefine Literary Fiesta across Hyderabad.`).split('\n').filter(Boolean).map((para, i) => (
+VOXERA' 26 marks the exciting debut of a brand-new literary fiesta, created to bring together talent, expression, and innovation on one dynamic platform. Exciting gifts, 6 competitive events, distinguished judges, and an immersive 3-day experience, VOXERA begins its journey with the ambition to redefine Literary Fiesta across Hyderabad.`).split('\n').filter(Boolean).map((para, i) => (
                                     <p key={i}>{para}</p>
                                 ))}
                             </div>

@@ -123,6 +123,7 @@ export const teamMembers = pgTable('team_members', {
     display_order: integer('display_order').notNull().default(0),
     linkedin_url: text('linkedin_url'),
     instagram_url: text('instagram_url'),
+    instagram_handle: varchar('instagram_handle', { length: 64 }),
     email: varchar('email', { length: 256 }),
     phone: varchar('phone', { length: 20 }),
     bio: text('bio'),

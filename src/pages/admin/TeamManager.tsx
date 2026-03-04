@@ -5,7 +5,7 @@ import { Plus, Edit, Trash2, X, Save, Archive, Users, Filter, Upload, ImageIcon 
 interface TeamMember {
     id: number; name: string; photo_url?: string; role?: string;
     designation?: string; dept_group?: string; display_order: number;
-    linkedin_url?: string; instagram_url?: string;
+    linkedin_url?: string; instagram_url?: string; instagram_handle?: string;
     is_active: boolean; is_archived: boolean; edition_id?: number;
 }
 
@@ -235,7 +235,10 @@ export default function TeamManager() {
                                 <div className="border-t border-slate-800 pt-4 mt-4">
                                     <h3 className="text-sm font-semibold text-teal-400 mb-3">🔗 Social Links</h3>
                                 </div>
-                                <div><label className="block text-sm font-medium text-slate-300 mb-1.5">Instagram URL</label><input value={form.instagram_url || ''} onChange={e => setForm({ ...form, instagram_url: e.target.value })} className={inputCls} /></div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div><label className="block text-sm font-medium text-slate-300 mb-1.5">Instagram URL</label><input value={form.instagram_url || ''} onChange={e => setForm({ ...form, instagram_url: e.target.value })} className={inputCls} placeholder="https://instagram.com/username" /></div>
+                                    <div><label className="block text-sm font-medium text-slate-300 mb-1.5">Instagram Handle</label><input value={(form as any).instagram_handle || ''} onChange={e => setForm({ ...form, instagram_handle: e.target.value } as any)} className={inputCls} placeholder="@chiruu.rose" /></div>
+                                </div>
 
                                 <div className="border-t border-slate-800 pt-4 mt-4">
                                     <h3 className="text-sm font-semibold text-teal-400 mb-3">⚙️ Settings</h3>
