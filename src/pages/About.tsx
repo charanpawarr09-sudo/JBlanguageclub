@@ -266,25 +266,24 @@ VOXERA' 26 marks the exciting debut of a brand-new literary fiesta, created to b
                                                         transition={{ delay: 0.3, type: 'spring', bounce: 0.3 }}
                                                     >
                                                         {/* Outer glow */}
-                                                        <div className="absolute -inset-6 rounded-full bg-gradient-to-br from-teal-500/25 via-amber-500/15 to-violet-500/20 blur-3xl group-hover:blur-2xl transition-all duration-700" />
-                                                        {member.photo_url ? (
-                                                            <>
-                                                                <div className="absolute -inset-[3px] rounded-full" style={{ background: 'conic-gradient(from 0deg, #14b8a6, #f59e0b, #8b5cf6, #ec4899, #14b8a6)' }} />
+                                                        <div className="absolute -inset-6 rounded-full bg-gradient-to-br from-teal-500/25 via-amber-500/15 to-violet-500/20 blur-3xl group-hover:blur-2xl transition-all duration-700 z-0" />
+                                                        {/* Gradient border ring */}
+                                                        <div className="absolute -inset-[3px] rounded-full z-[1]" style={{ background: 'conic-gradient(from 0deg, #14b8a6, #f59e0b, #8b5cf6, #ec4899, #14b8a6)' }} />
+                                                        {/* Image container with clipping */}
+                                                        <div className="relative z-[2] w-40 h-40 sm:w-48 sm:h-48 rounded-full overflow-hidden">
+                                                            {member.photo_url ? (
                                                                 <img
                                                                     src={member.photo_url}
                                                                     alt={member.name}
-                                                                    className="relative w-40 h-40 sm:w-48 sm:h-48 rounded-full object-cover block"
+                                                                    className="w-full h-full object-cover block"
                                                                     style={{ objectPosition: `center ${member.photo_position || 'center'}` }}
                                                                 />
-                                                            </>
-                                                        ) : (
-                                                            <>
-                                                                <div className="absolute -inset-[3px] rounded-full" style={{ background: 'conic-gradient(from 0deg, #14b8a6, #f59e0b, #8b5cf6, #ec4899, #14b8a6)' }} />
-                                                                <div className="relative w-40 h-40 sm:w-48 sm:h-48 rounded-full bg-gradient-to-br from-teal-600 via-teal-700 to-emerald-800 flex items-center justify-center text-white text-5xl sm:text-6xl font-bold">
+                                                            ) : (
+                                                                <div className="w-full h-full bg-gradient-to-br from-teal-600 via-teal-700 to-emerald-800 flex items-center justify-center text-white text-5xl sm:text-6xl font-bold">
                                                                     {getInitials(member.name)}
                                                                 </div>
-                                                            </>
-                                                        )}
+                                                            )}
+                                                        </div>
                                                     </motion.div>
 
                                                     {/* Name */}
@@ -382,16 +381,16 @@ VOXERA' 26 marks the exciting debut of a brand-new literary fiesta, created to b
                                                 >
                                                     {/* Avatar */}
                                                     <div className="relative mx-auto mb-4">
-                                                        <div className="absolute -inset-1 rounded-full bg-gradient-to-br from-teal-500/30 to-amber-500/30 opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-300" />
+                                                        <div className="absolute -inset-1 rounded-full bg-gradient-to-br from-teal-500/30 to-amber-500/30 opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-300 z-0" />
                                                         {member.photo_url ? (
                                                             <img
                                                                 src={member.photo_url}
                                                                 alt={member.name}
-                                                                className="relative w-20 h-20 rounded-full object-cover border-2 border-teal-500/20 mx-auto"
+                                                                className="relative z-[1] w-20 h-20 rounded-full object-cover border-2 border-teal-500/20 mx-auto"
                                                                 style={{ objectPosition: `center ${member.photo_position || 'center'}` }}
                                                             />
                                                         ) : (
-                                                            <div className="relative w-20 h-20 rounded-full bg-gradient-to-br from-teal-600 to-teal-800 flex items-center justify-center text-white text-xl font-bold mx-auto border-2 border-teal-500/20">
+                                                            <div className="relative z-[1] w-20 h-20 rounded-full bg-gradient-to-br from-teal-600 to-teal-800 flex items-center justify-center text-white text-xl font-bold mx-auto border-2 border-teal-500/20">
                                                                 {getInitials(member.name)}
                                                             </div>
                                                         )}

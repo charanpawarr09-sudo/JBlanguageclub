@@ -185,25 +185,24 @@ export default function TeamProfile() {
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ duration: 0.7, type: 'spring', bounce: 0.3 }}
                         >
-                            <div className="absolute -inset-4 rounded-full bg-gradient-to-br from-teal-500/30 via-emerald-500/20 to-amber-500/25 blur-2xl" />
-                            {member.photo_url ? (
-                                <>
-                                    <div className="absolute -inset-[3px] rounded-full" style={{ background: 'linear-gradient(135deg, #14b8a6, #f59e0b, #8b5cf6, #14b8a6)' }} />
+                            <div className="absolute -inset-4 rounded-full bg-gradient-to-br from-teal-500/30 via-emerald-500/20 to-amber-500/25 blur-2xl z-0" />
+                            {/* Gradient border ring */}
+                            <div className="absolute -inset-[3px] rounded-full z-[1]" style={{ background: 'linear-gradient(135deg, #14b8a6, #f59e0b, #8b5cf6, #14b8a6)' }} />
+                            {/* Image container with clipping */}
+                            <div className="relative z-[2] w-44 h-44 sm:w-52 sm:h-52 rounded-full overflow-hidden">
+                                {member.photo_url ? (
                                     <img
                                         src={member.photo_url}
                                         alt={member.name}
-                                        className="relative w-44 h-44 sm:w-52 sm:h-52 rounded-full object-cover block"
+                                        className="w-full h-full object-cover block"
                                         style={{ objectPosition: `center ${member.photo_position || 'center'}` }}
                                     />
-                                </>
-                            ) : (
-                                <>
-                                    <div className="absolute -inset-[3px] rounded-full" style={{ background: 'linear-gradient(135deg, #14b8a6, #f59e0b, #8b5cf6, #14b8a6)' }} />
-                                    <div className="relative w-44 h-44 sm:w-52 sm:h-52 rounded-full bg-gradient-to-br from-teal-600 via-teal-700 to-emerald-800 flex items-center justify-center text-white text-6xl font-bold">
+                                ) : (
+                                    <div className="w-full h-full bg-gradient-to-br from-teal-600 via-teal-700 to-emerald-800 flex items-center justify-center text-white text-6xl font-bold">
                                         {getInitials(member.name)}
                                     </div>
-                                </>
-                            )}
+                                )}
+                            </div>
                         </motion.div>
 
                         {/* Name — large, display font */}
@@ -501,11 +500,11 @@ export default function TeamProfile() {
                                     >
                                         <div className="absolute inset-0 rounded-3xl bg-gradient-to-b from-teal-500/[0.04] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                                         <div className="relative mx-auto mb-4">
-                                            <div className="absolute -inset-1.5 rounded-full bg-gradient-to-br from-teal-500/25 to-amber-500/25 opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-500" />
+                                            <div className="absolute -inset-1.5 rounded-full bg-gradient-to-br from-teal-500/25 to-amber-500/25 opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-500 z-0" />
                                             {m.photo_url ? (
-                                                <img src={m.photo_url} alt={m.name} className="relative w-18 h-18 rounded-full object-cover border-2 border-white/[0.08] mx-auto group-hover:border-teal-500/30 transition-colors" style={{ width: 72, height: 72, objectPosition: `center ${m.photo_position || 'center'}` }} />
+                                                <img src={m.photo_url} alt={m.name} className="relative z-[1] w-18 h-18 rounded-full object-cover border-2 border-white/[0.08] mx-auto group-hover:border-teal-500/30 transition-colors" style={{ width: 72, height: 72, objectPosition: `center ${m.photo_position || 'center'}` }} />
                                             ) : (
-                                                <div className="relative rounded-full bg-gradient-to-br from-teal-600 to-teal-800 flex items-center justify-center text-white text-lg font-bold mx-auto border-2 border-white/[0.08] group-hover:border-teal-500/30 transition-colors" style={{ width: 72, height: 72 }}>
+                                                <div className="relative z-[1] rounded-full bg-gradient-to-br from-teal-600 to-teal-800 flex items-center justify-center text-white text-lg font-bold mx-auto border-2 border-white/[0.08] group-hover:border-teal-500/30 transition-colors" style={{ width: 72, height: 72 }}>
                                                     {getInitials(m.name)}
                                                 </div>
                                             )}
