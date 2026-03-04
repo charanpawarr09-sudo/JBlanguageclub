@@ -90,7 +90,6 @@ export default function ContentEditor() {
                 <form onSubmit={saveSettings} className="space-y-5 max-w-2xl">
                     <div><label className="block text-sm font-medium text-slate-300 mb-1.5">Hero Title</label><input value={settings.hero_title || ''} onChange={e => setSettings({ ...settings, hero_title: e.target.value })} className={inputCls} /></div>
                     <div><label className="block text-sm font-medium text-slate-300 mb-1.5">Hero Tagline</label><input value={settings.hero_tagline || ''} onChange={e => setSettings({ ...settings, hero_tagline: e.target.value })} className={inputCls} /></div>
-                    <div><label className="block text-sm font-medium text-slate-300 mb-1.5">Hero Background Image/Video URL</label><input value={settings.hero_image || ''} onChange={e => setSettings({ ...settings, hero_image: e.target.value })} className={inputCls} /></div>
                     <h3 className="text-lg font-semibold text-white pt-4 border-t border-slate-800">Event Dates & Venue</h3>
                     <div className="grid grid-cols-2 gap-4">
                         <div><label className="block text-sm font-medium text-slate-300 mb-1.5">Event Start Date (countdown)</label><input type="datetime-local" value={settings.event_start_date ? settings.event_start_date.slice(0, 16) : ''} onChange={e => setSettings({ ...settings, event_start_date: e.target.value ? new Date(e.target.value).toISOString() : '' })} className={inputCls} /></div>
