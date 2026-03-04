@@ -12,6 +12,7 @@ interface TeamMember {
     role: string;
     designation?: string;
     photo_url?: string;
+    photo_position?: string;
     dept_group?: string;
 }
 
@@ -222,6 +223,7 @@ VOXERA' 26 marks the exciting debut of a brand-new literary fiesta, created to b
                                                     src={member.photo_url}
                                                     alt={member.name}
                                                     className="relative w-20 h-20 rounded-full object-cover border-2 border-teal-500/20 mx-auto"
+                                                    style={{ objectPosition: `center ${member.photo_position || 'center'}` }}
                                                 />
                                             ) : (
                                                 <div className="relative w-20 h-20 rounded-full bg-gradient-to-br from-teal-600 to-teal-800 flex items-center justify-center text-white text-xl font-bold mx-auto border-2 border-teal-500/20">

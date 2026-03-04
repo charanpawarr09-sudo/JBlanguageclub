@@ -279,7 +279,7 @@ export default function EventsManager() {
     const [toast, setToast] = useState('');
     const [participationType, setParticipationType] = useState<ParticipationType>('single');
 
-    const categories = ['Literary', 'Cultural', 'Informal', 'Management', 'Technical', 'Gaming', 'Workshop', 'Ceremony'];
+    const categories = ['Literary', 'Cultural', 'Formal', 'Informal', 'Management', 'Technical', 'Gaming', 'Workshop', 'Ceremony'];
 
     useEffect(() => { fetchEvents(); }, []);
 

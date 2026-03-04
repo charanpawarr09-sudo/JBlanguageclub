@@ -116,6 +116,7 @@ export const teamMembers = pgTable('team_members', {
     edition_id: integer('edition_id'),
     name: varchar('name', { length: 256 }).notNull(),
     photo_url: text('photo_url'),
+    photo_position: varchar('photo_position', { length: 16 }).default('center'),
     role: varchar('role', { length: 128 }),
     designation: varchar('designation', { length: 256 }),
     dept_group: varchar('dept_group', { length: 64 }),

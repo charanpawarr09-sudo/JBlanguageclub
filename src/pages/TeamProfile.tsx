@@ -15,6 +15,7 @@ interface TeamMember {
     role: string;
     designation?: string;
     photo_url?: string;
+    photo_position?: string;
     dept_group?: string;
     linkedin_url?: string;
     instagram_url?: string;
@@ -187,6 +188,7 @@ export default function TeamProfile() {
                                         src={member.photo_url}
                                         alt={member.name}
                                         className="relative w-44 h-44 rounded-full object-cover border-2 border-transparent"
+                                        style={{ objectPosition: `center ${member.photo_position || 'center'}` }}
                                     />
                                 ) : (
                                     <div className="relative w-44 h-44 rounded-full bg-gradient-to-br from-teal-600 to-teal-800 flex items-center justify-center text-white text-5xl font-bold border-2 border-transparent">
@@ -534,7 +536,7 @@ export default function TeamProfile() {
                                         <div className="relative mx-auto mb-3">
                                             <div className="absolute -inset-1 rounded-full bg-gradient-to-br from-teal-500/30 to-amber-500/30 opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-300" />
                                             {m.photo_url ? (
-                                                <img src={m.photo_url} alt={m.name} className="relative w-16 h-16 rounded-full object-cover border-2 border-teal-500/20 mx-auto" />
+                                                <img src={m.photo_url} alt={m.name} className="relative w-16 h-16 rounded-full object-cover border-2 border-teal-500/20 mx-auto" style={{ objectPosition: `center ${m.photo_position || 'center'}` }} />
                                             ) : (
                                                 <div className="relative w-16 h-16 rounded-full bg-gradient-to-br from-teal-600 to-teal-800 flex items-center justify-center text-white text-lg font-bold mx-auto border-2 border-teal-500/20">
                                                     {getInitials(m.name)}

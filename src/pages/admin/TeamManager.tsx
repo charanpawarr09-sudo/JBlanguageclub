@@ -1,6 +1,6 @@
-import { useState, useEffect, FormEvent } from 'react';
+import { useState, useEffect, FormEvent, useRef, DragEvent } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Plus, Edit, Trash2, X, Save, Archive, Users, Filter } from 'lucide-react';
+import { Plus, Edit, Trash2, X, Save, Archive, Users, Filter, Upload, ImageIcon } from 'lucide-react';
 
 interface TeamMember {
     id: number; name: string; photo_url?: string; role?: string;
@@ -18,11 +18,40 @@ export default function TeamManager() {
     const [search, setSearch] = useState('');
     const [filterGroup, setFilterGroup] = useState('all');
     const [toast, setToast] = useState('');
+    const [uploading, setUploading] = useState(false);
+    const [dragOver, setDragOver] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const groups = ['Core Team', 'Technical', 'Creative', 'Outreach', 'Management', 'Other'];
 
     useEffect(() => { fetchMembers(); }, []);
     const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(''), 4000); };
+
+    const handlePhotoUpload = async (file: File) => {
+        if (!file.type.startsWith('image/')) { showToast('Please select an image file'); return; }
+        if (file.size > 5 * 1024 * 1024) { showToast('Image must be under 5MB'); return; }
+        setUploading(true);
+        try {
+            const fd = new FormData();
+            fd.append('image', file);
+            const res = await fetch('/api/admin/upload', { method: 'POST', credentials: 'include', body: fd });
+            if (res.ok) {
+                const data = await res.json();
+                setForm(prev => ({ ...prev, photo_url: data.url }));
+                showToast('Photo uploaded!');
+            } else {
+                const d = await res.json();
+                showToast(d.error || 'Upload failed');
+            }
+        } catch { showToast('Upload failed'); }
+        finally { setUploading(false); }
+    };
+
+    const handleDrop = (e: DragEvent<HTMLDivElement>) => {
+        e.preventDefault(); setDragOver(false);
+        const file = e.dataTransfer.files?.[0];
+        if (file) handlePhotoUpload(file);
+    };
 
     const fetchMembers = async () => {
         setLoading(true);
@@ -94,7 +123,7 @@ export default function TeamManager() {
                         <motion.div key={member.id} layout className="bg-slate-900/50 border border-slate-800 rounded-xl p-4 hover:border-slate-700 transition-colors group">
                             <div className="flex justify-center mb-3">
                                 {member.photo_url ? (
-                                    <img src={member.photo_url} alt={member.name} className="w-20 h-20 rounded-full object-cover border-2 border-slate-700" />
+                                    <img src={member.photo_url} alt={member.name} className="w-20 h-20 rounded-full object-cover border-2 border-slate-700" style={{ objectPosition: `center ${(member as any).photo_position || 'center'}` }} />
                                 ) : (
                                     <div className="w-20 h-20 rounded-full bg-gradient-to-br from-teal-600 to-emerald-700 flex items-center justify-center text-white text-2xl font-bold">{member.name.charAt(0)}</div>
                                 )}
@@ -131,7 +160,63 @@ export default function TeamManager() {
                                         <option value="">Select...</option>{groups.map(g => <option key={g} value={g}>{g}</option>)}
                                     </select>
                                 </div>
-                                <div><label className="block text-sm font-medium text-slate-300 mb-1.5">Photo URL</label><input value={form.photo_url || ''} onChange={e => setForm({ ...form, photo_url: e.target.value })} className={inputCls} /></div>
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-300 mb-1.5">Photo</label>
+                                    {form.photo_url ? (
+                                        <div className="flex items-start gap-4">
+                                            <div className="relative group/photo flex-shrink-0">
+                                                <img src={form.photo_url} alt="Preview" className="w-24 h-24 rounded-full object-cover border-2 border-slate-700"
+                                                    style={{ objectPosition: `center ${(form as any).photo_position || 'center'}` }} />
+                                                <button type="button" onClick={() => setForm({ ...form, photo_url: '' })}
+                                                    className="absolute -top-2 -right-2 p-1 bg-red-600 rounded-full text-white opacity-0 group-hover/photo:opacity-100 transition-opacity shadow-lg">
+                                                    <X className="w-3.5 h-3.5" />
+                                                </button>
+                                            </div>
+                                            <div className="flex-1">
+                                                <p className="text-xs text-slate-500 mb-2">Adjust photo position</p>
+                                                <div className="flex gap-1.5">
+                                                    {([
+                                                        { value: 'top', label: '⬆ Top' },
+                                                        { value: 'center', label: '⬛ Center' },
+                                                        { value: 'bottom', label: '⬇ Bottom' },
+                                                    ] as const).map(opt => (
+                                                        <button key={opt.value} type="button"
+                                                            onClick={() => setForm({ ...form, photo_position: opt.value } as any)}
+                                                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${((form as any).photo_position || 'center') === opt.value
+                                                                ? 'bg-teal-600 text-white shadow-md'
+                                                                : 'bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700'
+                                                                }`}>
+                                                            {opt.label}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                                <button type="button" onClick={() => fileInputRef.current?.click()}
+                                                    className="mt-2 text-xs text-teal-400 hover:text-teal-300 transition-colors">
+                                                    Replace photo
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div
+                                            onClick={() => fileInputRef.current?.click()}
+                                            onDrop={handleDrop}
+                                            onDragOver={e => { e.preventDefault(); setDragOver(true); }}
+                                            onDragLeave={() => setDragOver(false)}
+                                            className={`flex flex-col items-center justify-center gap-2 p-6 border-2 border-dashed rounded-xl cursor-pointer transition-all ${dragOver ? 'border-teal-400 bg-teal-900/20' : 'border-slate-700 hover:border-slate-500 bg-slate-950'
+                                                } ${uploading ? 'pointer-events-none opacity-60' : ''}`}
+                                        >
+                                            {uploading ? (
+                                                <div className="w-8 h-8 border-2 border-teal-400 border-t-transparent rounded-full animate-spin" />
+                                            ) : (
+                                                <Upload className="w-8 h-8 text-slate-500" />
+                                            )}
+                                            <p className="text-sm text-slate-400">{uploading ? 'Uploading...' : 'Click or drag image here'}</p>
+                                            <p className="text-xs text-slate-600">PNG, JPG, WEBP — Max 5MB</p>
+                                        </div>
+                                    )}
+                                    <input ref={fileInputRef} type="file" accept="image/*" className="hidden"
+                                        onChange={e => { const f = e.target.files?.[0]; if (f) handlePhotoUpload(f); e.target.value = ''; }} />
+                                </div>
 
                                 <div className="border-t border-slate-800 pt-4 mt-4">
                                     <h3 className="text-sm font-semibold text-teal-400 mb-3">📋 Profile Details</h3>

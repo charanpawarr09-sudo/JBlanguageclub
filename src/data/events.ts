@@ -1,4 +1,4 @@
-export type EventCategory = 'Technical' | 'Cultural' | 'Gaming' | 'Workshop' | 'Literary' | 'Management' | 'Informal' | 'Ceremony';
+export type EventCategory = 'Technical' | 'Cultural' | 'Gaming' | 'Workshop' | 'Literary' | 'Management' | 'Formal' | 'Informal' | 'Ceremony';
 
 export interface EventCoordinator {
   name: string;
