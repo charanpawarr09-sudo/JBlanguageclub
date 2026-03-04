@@ -211,79 +211,167 @@ VOXERA' 26 marks the exciting debut of a brand-new literary fiesta, created to b
                         </div>
                     ) : team.length > 0 ? (
                         <>
-                            {/* ═══ Founder / Lead Spotlight ═══ */}
+                            {/* ═══ Founder / Lead — Cinematic Spotlight ═══ */}
                             {founders.length > 0 && (
-                                <div className="mb-12">
-                                    <motion.p
-                                        className="text-center text-slate-500 text-xs uppercase tracking-[0.2em] font-medium mb-8"
-                                        initial={{ opacity: 0 }}
-                                        whileInView={{ opacity: 1 }}
-                                        viewport={{ once: true }}
-                                    >
-                                        ★ Leadership ★
-                                    </motion.p>
-                                    <div className={`grid gap-8 justify-items-center ${founders.length === 1 ? 'max-w-md mx-auto' : founders.length === 2 ? 'sm:grid-cols-2 max-w-3xl mx-auto' : 'sm:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto'}`}>
-                                        {founders.map((member, i) => (
-                                            <Link to={`/about/team/${member.id}`} key={member.id} className="w-full">
-                                                <motion.div
-                                                    className="group relative rounded-3xl p-[1px] bg-gradient-to-br from-teal-500/60 via-amber-500/40 to-teal-500/60 hover:from-teal-400/80 hover:via-amber-400/60 hover:to-teal-400/80 transition-all duration-500 cursor-pointer"
-                                                    initial={{ opacity: 0, y: 30 }}
-                                                    whileInView={{ opacity: 1, y: 0 }}
-                                                    viewport={{ once: true }}
-                                                    transition={{ delay: i * 0.15, duration: 0.6 }}
-                                                >
-                                                    {/* Glow effect */}
-                                                    <div className="absolute -inset-2 bg-gradient-to-br from-teal-500/20 via-amber-500/10 to-teal-500/20 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                                <div className="mb-20">
+                                    {founders.map((member, i) => (
+                                        <Link to={`/about/team/${member.id}`} key={member.id} className="block group">
+                                            <motion.div
+                                                className="relative py-16 sm:py-24 -mx-4 px-4 overflow-hidden cursor-pointer"
+                                                initial={{ opacity: 0 }}
+                                                whileInView={{ opacity: 1 }}
+                                                viewport={{ once: true }}
+                                                transition={{ duration: 1, delay: i * 0.2 }}
+                                            >
+                                                {/* Animated background */}
+                                                <div className="absolute inset-0">
+                                                    <motion.div
+                                                        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] rounded-full blur-[150px] opacity-30"
+                                                        style={{ background: 'radial-gradient(circle, rgba(20,184,166,0.2) 0%, rgba(245,158,11,0.08) 50%, transparent 70%)' }}
+                                                        animate={{ scale: [1, 1.15, 1], rotate: [0, 5, 0] }}
+                                                        transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
+                                                    />
+                                                    <motion.div
+                                                        className="absolute top-1/4 right-1/4 w-96 h-96 rounded-full bg-amber-500/[0.04] blur-[100px]"
+                                                        animate={{ x: [0, 30, 0], y: [0, -20, 0] }}
+                                                        transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
+                                                    />
+                                                </div>
 
-                                                    <div className="relative rounded-3xl bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 p-8 text-center overflow-hidden">
-                                                        {/* Subtle inner glow */}
-                                                        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-32 bg-gradient-to-b from-teal-500/[0.06] to-transparent rounded-full blur-2xl" />
-
-                                                        {/* Badge */}
-                                                        <motion.div
-                                                            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-amber-500/20 to-teal-500/20 border border-amber-500/30 text-amber-400 text-xs font-semibold mb-5 relative"
-                                                            animate={{ boxShadow: ['0 0 0 0 rgba(245,158,11,0)', '0 0 12px 2px rgba(245,158,11,0.15)', '0 0 0 0 rgba(245,158,11,0)'] }}
-                                                            transition={{ duration: 3, repeat: Infinity }}
+                                                <div className="relative z-10 text-center max-w-2xl mx-auto">
+                                                    {/* Founder badge */}
+                                                    <motion.div
+                                                        className="mb-10"
+                                                        initial={{ opacity: 0, y: 20 }}
+                                                        whileInView={{ opacity: 1, y: 0 }}
+                                                        viewport={{ once: true }}
+                                                        transition={{ delay: 0.2 }}
+                                                    >
+                                                        <motion.span
+                                                            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-bold uppercase tracking-[0.15em]"
+                                                            style={{
+                                                                background: 'linear-gradient(135deg, rgba(245,158,11,0.15), rgba(20,184,166,0.12))',
+                                                                border: '1px solid rgba(245,158,11,0.3)',
+                                                                color: '#fbbf24',
+                                                            }}
+                                                            animate={{
+                                                                boxShadow: [
+                                                                    '0 0 20px rgba(245,158,11,0), 0 0 40px rgba(245,158,11,0)',
+                                                                    '0 0 20px rgba(245,158,11,0.15), 0 0 60px rgba(245,158,11,0.05)',
+                                                                    '0 0 20px rgba(245,158,11,0), 0 0 40px rgba(245,158,11,0)',
+                                                                ]
+                                                            }}
+                                                            transition={{ duration: 4, repeat: Infinity }}
                                                         >
-                                                            <Star className="w-3 h-3" /> Founder & Lead
+                                                            <Star className="w-4 h-4" /> Founder & Lead
+                                                        </motion.span>
+                                                    </motion.div>
+
+                                                    {/* Large avatar with premium ring */}
+                                                    <motion.div
+                                                        className="relative inline-block mb-10"
+                                                        initial={{ opacity: 0, scale: 0.8 }}
+                                                        whileInView={{ opacity: 1, scale: 1 }}
+                                                        viewport={{ once: true }}
+                                                        transition={{ delay: 0.3, type: 'spring', bounce: 0.3 }}
+                                                    >
+                                                        {/* Outer glow */}
+                                                        <div className="absolute -inset-6 rounded-full bg-gradient-to-br from-teal-500/25 via-amber-500/15 to-violet-500/20 blur-3xl group-hover:blur-2xl transition-all duration-700" />
+
+                                                        {/* Gradient ring */}
+                                                        <motion.div
+                                                            className="absolute -inset-1.5 rounded-full"
+                                                            style={{ background: 'conic-gradient(from 0deg, #14b8a6, #f59e0b, #8b5cf6, #ec4899, #14b8a6)' }}
+                                                            animate={{ rotate: [0, 360] }}
+                                                            transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
+                                                        >
+                                                            <div className="absolute inset-[2px] rounded-full bg-[#071515]" />
                                                         </motion.div>
 
-                                                        {/* Avatar */}
-                                                        <div className="relative mx-auto mb-5">
-                                                            <div className="absolute -inset-2 rounded-full bg-gradient-to-br from-teal-500/40 via-amber-500/30 to-teal-500/40 blur-lg opacity-60 group-hover:opacity-100 transition-opacity duration-500" />
-                                                            <div className="absolute -inset-0.5 rounded-full bg-gradient-to-br from-teal-500 to-amber-500 p-[2px]">
-                                                                <div className="w-full h-full rounded-full bg-slate-900" />
+                                                        {member.photo_url ? (
+                                                            <img
+                                                                src={member.photo_url}
+                                                                alt={member.name}
+                                                                className="relative w-40 h-40 sm:w-48 sm:h-48 rounded-full object-cover group-hover:scale-105 transition-transform duration-700"
+                                                                style={{ objectPosition: `center ${member.photo_position || 'center'}` }}
+                                                            />
+                                                        ) : (
+                                                            <div className="relative w-40 h-40 sm:w-48 sm:h-48 rounded-full bg-gradient-to-br from-teal-600 via-teal-700 to-emerald-800 flex items-center justify-center text-white text-5xl sm:text-6xl font-bold group-hover:scale-105 transition-transform duration-700">
+                                                                {getInitials(member.name)}
                                                             </div>
-                                                            {member.photo_url ? (
-                                                                <img
-                                                                    src={member.photo_url}
-                                                                    alt={member.name}
-                                                                    className="relative w-28 h-28 rounded-full object-cover border-2 border-transparent mx-auto"
-                                                                    style={{ objectPosition: `center ${member.photo_position || 'center'}` }}
-                                                                />
-                                                            ) : (
-                                                                <div className="relative w-28 h-28 rounded-full bg-gradient-to-br from-teal-600 to-teal-800 flex items-center justify-center text-white text-3xl font-bold mx-auto border-2 border-transparent">
-                                                                    {getInitials(member.name)}
-                                                                </div>
-                                                            )}
-                                                        </div>
-
-                                                        <h3 className="text-xl font-bold text-white mb-1 relative" style={{ fontFamily: 'var(--font-display)' }}>{member.name}</h3>
-                                                        <p className="text-teal-400 text-sm font-medium mb-1 relative">{member.role}</p>
-                                                        {member.designation && <p className="text-slate-500 text-xs mb-3 relative">{member.designation}</p>}
-                                                        {member.dept_group && (
-                                                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-teal-500/10 border border-teal-500/20 text-teal-400 text-xs font-medium relative">
-                                                                {member.dept_group}
-                                                            </span>
                                                         )}
-                                                        <div className="mt-4 relative">
-                                                            <span className="text-xs text-slate-500 group-hover:text-amber-400 transition-colors">View Full Profile →</span>
-                                                        </div>
-                                                    </div>
-                                                </motion.div>
-                                            </Link>
-                                        ))}
-                                    </div>
+                                                    </motion.div>
+
+                                                    {/* Name */}
+                                                    <motion.h3
+                                                        className="text-4xl sm:text-5xl md:text-6xl font-black text-white mb-3 tracking-tight"
+                                                        style={{ fontFamily: 'var(--font-display)', lineHeight: '1.1' }}
+                                                        initial={{ opacity: 0, y: 25 }}
+                                                        whileInView={{ opacity: 1, y: 0 }}
+                                                        viewport={{ once: true }}
+                                                        transition={{ delay: 0.4 }}
+                                                    >
+                                                        {member.name}
+                                                    </motion.h3>
+
+                                                    {/* Role */}
+                                                    <motion.p
+                                                        className="text-xl sm:text-2xl font-medium mb-2"
+                                                        style={{ color: '#5eead4' }}
+                                                        initial={{ opacity: 0 }}
+                                                        whileInView={{ opacity: 1 }}
+                                                        viewport={{ once: true }}
+                                                        transition={{ delay: 0.5 }}
+                                                    >
+                                                        {member.role}
+                                                    </motion.p>
+
+                                                    {member.designation && (
+                                                        <motion.p
+                                                            className="text-slate-500 mb-6"
+                                                            initial={{ opacity: 0 }}
+                                                            whileInView={{ opacity: 1 }}
+                                                            viewport={{ once: true }}
+                                                            transition={{ delay: 0.55 }}
+                                                        >
+                                                            {member.designation}
+                                                        </motion.p>
+                                                    )}
+
+                                                    {member.dept_group && (
+                                                        <motion.span
+                                                            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-teal-500/[0.08] border border-teal-500/15 text-teal-400 text-sm font-medium mb-8"
+                                                            initial={{ opacity: 0 }}
+                                                            whileInView={{ opacity: 1 }}
+                                                            viewport={{ once: true }}
+                                                            transition={{ delay: 0.6 }}
+                                                        >
+                                                            <Sparkles className="w-3.5 h-3.5" /> {member.dept_group}
+                                                        </motion.span>
+                                                    )}
+
+                                                    {/* CTA Button */}
+                                                    <motion.div
+                                                        className="mt-8"
+                                                        initial={{ opacity: 0, y: 15 }}
+                                                        whileInView={{ opacity: 1, y: 0 }}
+                                                        viewport={{ once: true }}
+                                                        transition={{ delay: 0.7 }}
+                                                    >
+                                                        <span className="inline-flex items-center gap-2 px-8 py-3.5 rounded-2xl text-sm font-semibold text-white transition-all duration-500 group-hover:scale-105 group-hover:shadow-lg group-hover:shadow-teal-500/20"
+                                                            style={{
+                                                                background: 'linear-gradient(135deg, rgba(20,184,166,0.2), rgba(245,158,11,0.15))',
+                                                                border: '1px solid rgba(20,184,166,0.25)',
+                                                            }}
+                                                        >
+                                                            View Full Profile
+                                                            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                                        </span>
+                                                    </motion.div>
+                                                </div>
+                                            </motion.div>
+                                        </Link>
+                                    ))}
                                 </div>
                             )}
 
