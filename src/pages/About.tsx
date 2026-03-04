@@ -268,28 +268,21 @@ VOXERA' 26 marks the exciting debut of a brand-new literary fiesta, created to b
                                                         {/* Outer glow */}
                                                         <div className="absolute -inset-6 rounded-full bg-gradient-to-br from-teal-500/25 via-amber-500/15 to-violet-500/20 blur-3xl group-hover:blur-2xl transition-all duration-700" />
 
-                                                        {/* Gradient ring */}
-                                                        <motion.div
-                                                            className="absolute -inset-1.5 rounded-full"
-                                                            style={{ background: 'conic-gradient(from 0deg, #14b8a6, #f59e0b, #8b5cf6, #ec4899, #14b8a6)' }}
-                                                            animate={{ rotate: [0, 360] }}
-                                                            transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
-                                                        >
-                                                            <div className="absolute inset-[2px] rounded-full bg-[#071515]" />
-                                                        </motion.div>
-
-                                                        {member.photo_url ? (
-                                                            <img
-                                                                src={member.photo_url}
-                                                                alt={member.name}
-                                                                className="relative w-40 h-40 sm:w-48 sm:h-48 rounded-full object-cover group-hover:scale-105 transition-transform duration-700"
-                                                                style={{ objectPosition: `center ${member.photo_position || 'center'}` }}
-                                                            />
-                                                        ) : (
-                                                            <div className="relative w-40 h-40 sm:w-48 sm:h-48 rounded-full bg-gradient-to-br from-teal-600 via-teal-700 to-emerald-800 flex items-center justify-center text-white text-5xl sm:text-6xl font-bold group-hover:scale-105 transition-transform duration-700">
-                                                                {getInitials(member.name)}
-                                                            </div>
-                                                        )}
+                                                        {/* Gradient border — photo inside */}
+                                                        <div className="relative rounded-full p-[3px]" style={{ background: 'conic-gradient(from 0deg, #14b8a6, #f59e0b, #8b5cf6, #ec4899, #14b8a6)' }}>
+                                                            {member.photo_url ? (
+                                                                <img
+                                                                    src={member.photo_url}
+                                                                    alt={member.name}
+                                                                    className="w-40 h-40 sm:w-48 sm:h-48 rounded-full object-cover block group-hover:scale-105 transition-transform duration-700"
+                                                                    style={{ objectPosition: `center ${member.photo_position || 'center'}` }}
+                                                                />
+                                                            ) : (
+                                                                <div className="w-40 h-40 sm:w-48 sm:h-48 rounded-full bg-gradient-to-br from-teal-600 via-teal-700 to-emerald-800 flex items-center justify-center text-white text-5xl sm:text-6xl font-bold group-hover:scale-105 transition-transform duration-700">
+                                                                    {getInitials(member.name)}
+                                                                </div>
+                                                            )}
+                                                        </div>
                                                     </motion.div>
 
                                                     {/* Name */}

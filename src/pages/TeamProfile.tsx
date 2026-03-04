@@ -188,23 +188,21 @@ export default function TeamProfile() {
                             {/* Outer glow ring */}
                             <div className="absolute -inset-4 rounded-full bg-gradient-to-br from-teal-500/30 via-emerald-500/20 to-amber-500/25 blur-2xl" />
 
-                            {/* Gradient ring */}
-                            <div className="absolute -inset-1 rounded-full p-[2px]" style={{ background: 'linear-gradient(135deg, #14b8a6, #f59e0b, #8b5cf6, #14b8a6)' }}>
-                                <div className="w-full h-full rounded-full bg-[#071515]" />
+                            {/* Gradient ring — wraps photo */}
+                            <div className="relative rounded-full p-[3px]" style={{ background: 'linear-gradient(135deg, #14b8a6, #f59e0b, #8b5cf6, #14b8a6)' }}>
+                                {member.photo_url ? (
+                                    <img
+                                        src={member.photo_url}
+                                        alt={member.name}
+                                        className="w-44 h-44 sm:w-52 sm:h-52 rounded-full object-cover block"
+                                        style={{ objectPosition: `center ${member.photo_position || 'center'}` }}
+                                    />
+                                ) : (
+                                    <div className="w-44 h-44 sm:w-52 sm:h-52 rounded-full bg-gradient-to-br from-teal-600 via-teal-700 to-emerald-800 flex items-center justify-center text-white text-6xl font-bold">
+                                        {getInitials(member.name)}
+                                    </div>
+                                )}
                             </div>
-
-                            {member.photo_url ? (
-                                <img
-                                    src={member.photo_url}
-                                    alt={member.name}
-                                    className="relative w-48 h-48 sm:w-56 sm:h-56 rounded-full object-cover"
-                                    style={{ objectPosition: `center ${member.photo_position || 'center'}` }}
-                                />
-                            ) : (
-                                <div className="relative w-48 h-48 sm:w-56 sm:h-56 rounded-full bg-gradient-to-br from-teal-600 via-teal-700 to-emerald-800 flex items-center justify-center text-white text-6xl font-bold">
-                                    {getInitials(member.name)}
-                                </div>
-                            )}
                         </motion.div>
 
                         {/* Name — large, display font */}
