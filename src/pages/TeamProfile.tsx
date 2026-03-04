@@ -119,7 +119,7 @@ export default function TeamProfile() {
             {/* ═══════════════════════════════════════════════════════ */}
             {/* ───  IMMERSIVE HERO SECTION  ─── */}
             {/* ═══════════════════════════════════════════════════════ */}
-            <section className="relative min-h-[85vh] flex items-center overflow-hidden">
+            <section className="relative min-h-[75vh] flex items-center overflow-hidden">
                 {/* Layered background */}
                 <div className="absolute inset-0">
                     <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-[#040f0f] to-[#071515]" />
@@ -128,28 +128,11 @@ export default function TeamProfile() {
                     <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_20%_30%,_rgba(20,184,166,0.12)_0%,_transparent_60%)]" />
                     <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_70%,_rgba(245,158,11,0.06)_0%,_transparent_55%)]" />
                     <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_rgba(139,92,246,0.04)_0%,_transparent_40%)]" />
-
-                    {/* Animated orbs */}
-                    <motion.div
-                        className="absolute top-[15%] left-[8%] w-[500px] h-[500px] rounded-full bg-teal-500/[0.04] blur-[100px]"
-                        animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
-                        transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
-                    />
-                    <motion.div
-                        className="absolute bottom-[10%] right-[5%] w-[600px] h-[400px] rounded-full bg-amber-500/[0.03] blur-[120px]"
-                        animate={{ y: [0, -30, 0], scale: [1, 1.15, 1] }}
-                        transition={{ duration: 15, repeat: Infinity, ease: 'easeInOut' }}
-                    />
-
-                    {/* Subtle noise texture */}
-                    <div className="absolute inset-0 opacity-[0.015]"
-                        style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")` }}
-                    />
                 </div>
 
-                <div className="container mx-auto px-4 relative z-10 pt-28 pb-16">
+                <div className="container mx-auto px-4 relative z-10 pt-20 pb-12">
                     {/* Navigation bar */}
-                    <div className="flex items-center justify-between mb-16">
+                    <div className="flex items-center justify-between mb-6">
                         <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
                             <Link to={ROUTES.ABOUT} className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full bg-white/[0.04] border border-white/[0.08] hover:border-teal-500/40 hover:bg-teal-500/[0.06] text-slate-300 hover:text-white transition-all duration-300 text-sm font-medium backdrop-blur-sm">
                                 <ArrowLeft className="w-4 h-4" /> Back to Team

@@ -223,19 +223,9 @@ VOXERA' 26 marks the exciting debut of a brand-new literary fiesta, created to b
                                                 viewport={{ once: true }}
                                                 transition={{ duration: 1, delay: i * 0.2 }}
                                             >
-                                                {/* Animated background */}
+                                                {/* Background */}
                                                 <div className="absolute inset-0">
-                                                    <motion.div
-                                                        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] rounded-full blur-[150px] opacity-30"
-                                                        style={{ background: 'radial-gradient(circle, rgba(20,184,166,0.2) 0%, rgba(245,158,11,0.08) 50%, transparent 70%)' }}
-                                                        animate={{ scale: [1, 1.15, 1], rotate: [0, 5, 0] }}
-                                                        transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
-                                                    />
-                                                    <motion.div
-                                                        className="absolute top-1/4 right-1/4 w-96 h-96 rounded-full bg-amber-500/[0.04] blur-[100px]"
-                                                        animate={{ x: [0, 30, 0], y: [0, -20, 0] }}
-                                                        transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
-                                                    />
+                                                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] rounded-full opacity-30" style={{ background: 'radial-gradient(circle, rgba(20,184,166,0.15) 0%, rgba(245,158,11,0.06) 50%, transparent 70%)' }} />
                                                 </div>
 
                                                 <div className="relative z-10 text-center max-w-2xl mx-auto">
