@@ -74,12 +74,12 @@ export default function TeamManager() {
     };
 
     const handleArchive = async (id: number) => {
-        if (!confirm('Archive this member?')) return;
+        if (!confirm('Delete this member permanently?')) return;
         try {
             const res = await fetch(`/api/admin/team/${id}`, { method: 'DELETE', credentials: 'include' });
-            if (!res.ok) { const d = await res.json(); showToast(d.error || 'Failed to archive member'); return; }
-            fetchMembers(); showToast('Member archived');
-        } catch { showToast('Failed to archive member'); }
+            if (!res.ok) { const d = await res.json(); showToast(d.error || 'Failed to delete member'); return; }
+            fetchMembers(); showToast('Member deleted');
+        } catch { showToast('Failed to delete member'); }
     };
 
     const filtered = members.filter(m => {
@@ -235,10 +235,7 @@ export default function TeamManager() {
                                 <div className="border-t border-slate-800 pt-4 mt-4">
                                     <h3 className="text-sm font-semibold text-teal-400 mb-3">🔗 Social Links</h3>
                                 </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div><label className="block text-sm font-medium text-slate-300 mb-1.5">LinkedIn URL</label><input value={form.linkedin_url || ''} onChange={e => setForm({ ...form, linkedin_url: e.target.value })} className={inputCls} /></div>
-                                    <div><label className="block text-sm font-medium text-slate-300 mb-1.5">Instagram URL</label><input value={form.instagram_url || ''} onChange={e => setForm({ ...form, instagram_url: e.target.value })} className={inputCls} /></div>
-                                </div>
+                                <div><label className="block text-sm font-medium text-slate-300 mb-1.5">Instagram URL</label><input value={form.instagram_url || ''} onChange={e => setForm({ ...form, instagram_url: e.target.value })} className={inputCls} /></div>
 
                                 <div className="border-t border-slate-800 pt-4 mt-4">
                                     <h3 className="text-sm font-semibold text-teal-400 mb-3">⚙️ Settings</h3>

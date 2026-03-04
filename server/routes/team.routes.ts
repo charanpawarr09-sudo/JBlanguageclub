@@ -81,15 +81,12 @@ router.delete('/api/admin/team/:id', verifyAdmin, async (req: AuthRequest, res: 
         const id = parseInt(req.params.id);
         const [existing] = await db.select().from(schema.teamMembers).where(eq(schema.teamMembers.id, id)).limit(1);
         if (!existing) { res.status(404).json({ error: 'Team member not found' }); return; }
-        const [archived] = await db.update(schema.teamMembers)
-            .set({ is_archived: true, is_active: false, updated_at: new Date() })
-            .where(eq(schema.teamMembers.id, id))
-            .returning();
-        await logAudit(req, 'archive', 'team_member', String(id), existing, archived);
-        res.json({ message: 'Team member archived', member: archived });
+        await db.delete(schema.teamMembers).where(eq(schema.teamMembers.id, id));
+        await logAudit(req, 'delete', 'team_member', String(id), existing, null);
+        res.json({ message: 'Team member deleted' });
     } catch (err) {
-        const message = err instanceof Error ? err.message : 'Failed to archive team member';
-        logger.error('Failed to archive team member', { error: message });
+        const message = err instanceof Error ? err.message : 'Failed to delete team member';
+        logger.error('Failed to delete team member', { error: message });
         res.status(500).json({ success: false, error: message });
     }
 });
