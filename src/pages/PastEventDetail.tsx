@@ -57,7 +57,7 @@ export default function PastEventDetail() {
 
     return (
         <Layout>
-            <PageSEO title={event.name} description={`${event.name} — A memorable JBLC event from ${event.year}`} />
+            <PageSEO title={event.name} description={`${event.name} | A memorable JBLC event from ${event.year}`} />
 
             {/* ─── Cinematic Hero ─── */}
             <section className="relative pt-28 pb-24 overflow-hidden">

@@ -170,7 +170,7 @@ export default function Home() {
 
   return (
     <Layout>
-      <PageSEO title="Home" description="VOXERA 2026 — A Literary Fiesta by JB Language Club at JBIET. March 16–18, 2026." />
+      <PageSEO title="Home" description="VOXERA 2026 | A Literary Fiesta by JB Language Club at JBIET. March 16–18, 2026." />
 
       {/* ─── Global Premium Features ─── */}
       <FloatingRegisterBtn />

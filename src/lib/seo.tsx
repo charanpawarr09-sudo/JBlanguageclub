@@ -9,7 +9,7 @@ interface PageSEOProps {
 
 export function PageSEO({ title, description, image, url }: PageSEOProps) {
     const fullTitle = `${title} | VOXERA 2026`;
-    const defaultDescription = 'VOXERA 2026 — A Literary Fiesta by JB Language Club at JBIET. March 16–18, 2026.';
+    const defaultDescription = 'VOXERA 2026 | A Literary Fiesta by JB Language Club at JBIET. March 16–18, 2026.';
     const desc = description || defaultDescription;
     const defaultImage = 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=1200&q=80';
 

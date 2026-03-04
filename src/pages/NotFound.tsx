@@ -8,7 +8,7 @@ import { Home, Search } from 'lucide-react';
 export default function NotFound() {
     return (
         <Layout>
-            <PageSEO title="404 — Page Not Found" />
+            <PageSEO title="404 | Page Not Found" />
 
             <div className="min-h-[80vh] flex items-center justify-center px-4 bg-[var(--bg-primary)]">
                 <motion.div

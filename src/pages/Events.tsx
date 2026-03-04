@@ -68,7 +68,7 @@ export default function Events() {
     <Layout>
       <PageSEO
         title="Events"
-        description="Explore all events at VOXERA 2026 — debates, poetry, open mic, pitch competitions, treasure hunts, and film screenings."
+        description="Explore all events at VOXERA 2026. Debates, poetry, open mic, pitch competitions, treasure hunts, and film screenings."
       />
 
       <section className="pt-32 pb-24 px-4 min-h-screen relative overflow-hidden">

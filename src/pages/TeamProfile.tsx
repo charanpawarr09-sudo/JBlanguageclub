@@ -115,7 +115,7 @@ export default function TeamProfile() {
 
     return (
         <Layout>
-            <PageSEO title={member.name} description={`${member.name} — ${member.role} at JB Language Club`} />
+            <PageSEO title={member.name} description={`${member.name} | ${member.role} at JB Language Club`} />
 
             {/* ═══════════════════════════════════════════════════════ */}
             {/* ───  IMMERSIVE HERO SECTION  ─── */}

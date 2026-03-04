@@ -400,7 +400,7 @@ export default function Register() {
      ═══════════════════════════════════════════ */
   return (
     <Layout>
-      <PageSEO title="Register" description="Register for VOXERA 2026 events — secure your spot today." />
+      <PageSEO title="Register" description="Register for VOXERA 2026 events and secure your spot today." />
 
       <div className="min-h-screen pt-28 pb-20 px-4 flex items-start justify-center bg-[#080810] relative overflow-hidden">
         {/* Aurora Blobs */}
