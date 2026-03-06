@@ -307,6 +307,7 @@ export default function EventsManager() {
                 id: editing ? editing.id : form.title?.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
                 rules: typeof form.rules === 'string' ? (form.rules as unknown as string).split('\n').filter(Boolean) : form.rules,
                 judging_criteria: typeof form.judging_criteria === 'string' ? (form.judging_criteria as unknown as string).split('\n').filter(Boolean) : form.judging_criteria,
+                rounds: form.rounds || null,
             };
             const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(body) });
             if (res.ok) { setIsModalOpen(false); fetchEvents(); showToast(editing ? 'Event updated!' : 'Event created!'); }
@@ -551,6 +552,45 @@ export default function EventsManager() {
                                 <div><label className={labelCls}>Rules (one per line)</label><textarea rows={3} value={Array.isArray(form.rules) ? form.rules.join('\n') : (form.rules || '')} onChange={e => setForm({ ...form, rules: e.target.value.split('\n') })} className={inputCls} /></div>
                                 <div><label className={labelCls}>Judging Criteria (one per line)</label><textarea rows={3} value={Array.isArray(form.judging_criteria) ? form.judging_criteria.join('\n') : (form.judging_criteria || '')} onChange={e => setForm({ ...form, judging_criteria: e.target.value.split('\n') })} className={inputCls} /></div>
                                 <div><label className={labelCls}>Coordinators (JSON)</label><textarea rows={3} value={(() => { try { return JSON.stringify(form.coordinators || [], null, 2); } catch { return '[]'; } })()} onChange={e => { try { setForm({ ...form, coordinators: JSON.parse(e.target.value) }); } catch { } }} className={inputCls} placeholder={'[{"name":"Name","role":"Role","phone":"+91 XXXXX"}]'} /></div>
+
+                                {/* ─── Rounds Editor ─── */}
+                                <div>
+                                    <div className="flex items-center justify-between mb-2">
+                                        <label className={labelCls}>Rounds / Screenings</label>
+                                        <button type="button" onClick={() => setForm({ ...form, rounds: [...(form.rounds || []), { title: '', description: '' }] })} className="text-xs px-3 py-1.5 bg-teal-600 hover:bg-teal-500 text-white rounded-lg transition-colors flex items-center gap-1">
+                                            <Plus className="w-3 h-3" /> Add Round
+                                        </button>
+                                    </div>
+                                    {(form.rounds || []).length === 0 && (
+                                        <p className="text-xs text-slate-500 italic mb-2">No rounds added yet. Click "Add Round" to create debate rounds or film screening entries.</p>
+                                    )}
+                                    <div className="space-y-3">
+                                        {(form.rounds || []).map((round, idx) => (
+                                            <div key={idx} className="p-3 bg-slate-950 border border-slate-700 rounded-xl space-y-2">
+                                                <div className="flex items-center justify-between">
+                                                    <span className="text-xs text-teal-400 font-semibold">Round {idx + 1}</span>
+                                                    <button type="button" onClick={() => {
+                                                        const updated = [...(form.rounds || [])];
+                                                        updated.splice(idx, 1);
+                                                        setForm({ ...form, rounds: updated });
+                                                    }} className="p-1 hover:bg-slate-800 rounded-lg text-slate-500 hover:text-red-400 transition-colors">
+                                                        <X className="w-3 h-3" />
+                                                    </button>
+                                                </div>
+                                                <input type="text" placeholder="Round title (e.g. Round 1 — Preliminary)" value={round.title} onChange={e => {
+                                                    const updated = [...(form.rounds || [])];
+                                                    updated[idx] = { ...updated[idx], title: e.target.value };
+                                                    setForm({ ...form, rounds: updated });
+                                                }} className={inputCls} />
+                                                <textarea rows={2} placeholder="Round description / topic" value={round.description} onChange={e => {
+                                                    const updated = [...(form.rounds || [])];
+                                                    updated[idx] = { ...updated[idx], description: e.target.value };
+                                                    setForm({ ...form, rounds: updated });
+                                                }} className={inputCls} />
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
                                 <div className="flex gap-6">
                                     <label className="flex items-center gap-2 cursor-pointer"><input type="checkbox" checked={form.is_published || false} onChange={e => setForm({ ...form, is_published: e.target.checked })} className="w-4 h-4 rounded bg-slate-800 border-slate-700 text-teal-600 focus:ring-teal-500" /><span className="text-sm text-slate-300">Published</span></label>
                                     <label className="flex items-center gap-2 cursor-pointer"><input type="checkbox" checked={form.registration_enabled ?? true} onChange={e => setForm({ ...form, registration_enabled: e.target.checked })} className="w-4 h-4 rounded bg-slate-800 border-slate-700 text-teal-600 focus:ring-teal-500" /><span className="text-sm text-slate-300">Registration Open</span></label>
