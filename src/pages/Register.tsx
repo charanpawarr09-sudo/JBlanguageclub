@@ -56,7 +56,7 @@ const FEE_DESCRIPTIONS: Record<string, string> = {
   'pitch-perfect': '₹50 flat',
   'open-mic': '₹99 solo / ₹150 duo',
   'treasure-hunt': '₹120 per person',
-  'film-screening': '₹80 per person',
+  'film-screening': 'Select a film below',
 };
 
 /* ─────── Load Razorpay script ─────── */
@@ -103,6 +103,7 @@ export default function Register() {
   const [rollNumber, setRollNumber] = useState('');
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [agreed, setAgreed] = useState(false);
+  const [selectedRoundIndex, setSelectedRoundIndex] = useState<number | null>(null);
 
   // Step 2/3 data
   const [paymentError, setPaymentError] = useState('');
@@ -140,16 +141,22 @@ export default function Register() {
     return Math.max(selectedEvent.team_size_min, teamMembers.length + 1);
   }, [selectedEvent, participationType, teamMembers.length]);
 
-  const displayFee = useMemo(
-    () => (selectedEventId ? estimateFee(selectedEventId, effectiveTeamSize) : 0),
-    [selectedEventId, effectiveTeamSize]
-  );
+  const displayFee = useMemo(() => {
+    if (!selectedEventId) return 0;
+    // For film-screening with per-round pricing, use the selected film's fee
+    if (selectedEventId === 'film-screening' && selectedRoundIndex !== null && selectedEvent?.rounds) {
+      const round = selectedEvent.rounds[selectedRoundIndex] as any;
+      if (round?.fee) return round.fee;
+    }
+    return estimateFee(selectedEventId, effectiveTeamSize);
+  }, [selectedEventId, effectiveTeamSize, selectedRoundIndex, selectedEvent]);
 
   /* ─── When event changes, reset ─── */
   useEffect(() => {
     if (selectedEvent) {
       setParticipationType(selectedEvent.team_size_min > 1 ? 'team' : 'solo');
       setTeamMembers([]);
+      setSelectedRoundIndex(null);
       trackRegistrationStart(selectedEvent.id);
     }
   }, [selectedEvent]);
@@ -169,6 +176,7 @@ export default function Register() {
     const errors: FieldErrors = {};
 
     if (!selectedEventId) errors.event = 'Please select an event.';
+    if (selectedEventId === 'film-screening' && selectedRoundIndex === null) errors.event = 'Please select a film to watch.';
     if (!primaryName.trim()) errors.name = 'Full name is required.';
     if (!primaryEmail.trim() || !/\S+@\S+\.\S+/.test(primaryEmail))
       errors.email = 'Valid email address is required.';
@@ -223,6 +231,7 @@ export default function Register() {
             email: m.email,
             roll_number: m.rollNumber,
           })),
+          selected_round_index: selectedEventId === 'film-screening' ? selectedRoundIndex : undefined,
         }),
       });
 
@@ -463,6 +472,45 @@ export default function Register() {
                     </select>
                     {fieldErrors.event && <p className={errorTextClass}>{fieldErrors.event}</p>}
                   </div>
+
+                  {/* ── Film Selection (for film-screening only) ── */}
+                  {selectedEventId === 'film-screening' && selectedEvent?.rounds && selectedEvent.rounds.length > 0 && (
+                    <div>
+                      <h3 className={labelClass}>Select a Film</h3>
+                      <div className="space-y-3">
+                        {selectedEvent.rounds.map((round, idx) => {
+                          const isSelected = selectedRoundIndex === idx;
+                          const fee = (round as any).fee;
+                          return (
+                            <button
+                              key={idx}
+                              type="button"
+                              onClick={() => setSelectedRoundIndex(idx)}
+                              className={`w-full text-left p-4 rounded-xl border transition-all ${isSelected
+                                ? 'border-amber-500 bg-amber-500/10 shadow-lg shadow-amber-500/10'
+                                : 'border-white/10 bg-white/5 hover:border-amber-500/40'
+                                }`}
+                            >
+                              <div className="flex items-center justify-between mb-1">
+                                <span className={`font-semibold text-sm ${isSelected ? 'text-amber-300' : 'text-white/80'}`}>
+                                  {round.title}
+                                </span>
+                                {fee && (
+                                  <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${isSelected
+                                    ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                                    : 'bg-white/5 text-white/40 border border-white/10'
+                                    }`}>
+                                    ₹{fee}
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-white/40 text-xs leading-relaxed line-clamp-2">{round.description}</p>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
 
                   {/* ── Personal Info ── */}
                   <div>

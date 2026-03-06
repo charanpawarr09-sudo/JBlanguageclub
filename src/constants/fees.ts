@@ -70,11 +70,11 @@ export const REGISTRATION_FEES: Record<string, EventFeeConfig> = {
         eventId: 'film-screening',
         eventTitle: 'Film Screening',
         feeType: 'per-person',
-        singleFee: 80,
+        singleFee: 50,
         teamFee: null,
         minTeamSize: 1,
         maxTeamSize: 1,
-        description: '₹80 per person',
+        description: 'Starting at ₹50 per film',
     },
 };
 
@@ -104,7 +104,7 @@ export function estimateFee(eventId: string, teamSize: number): number {
         case 'poetry-reciting':
             return 99 * teamSize;
         case 'film-screening':
-            return 80 * teamSize;
+            return 50; // Default base price; actual price per film may differ
         default:
             return 0;
     }

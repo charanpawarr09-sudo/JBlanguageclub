@@ -201,10 +201,12 @@ export default function EventDetails() {
         <div className="grid lg:grid-cols-[1fr_340px] gap-10">
           <div className="space-y-14">
             {/* About */}
-            <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-              <h2 className="text-2xl font-bold mb-5 text-white" style={{ fontFamily: 'var(--font-heading)' }}>About the Event</h2>
-              <p className="text-slate-400 leading-relaxed text-lg">{event.description}</p>
-            </motion.section>
+            {event.description && (
+              <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+                <h2 className="text-2xl font-bold mb-5 text-white" style={{ fontFamily: 'var(--font-heading)' }}>About the Event</h2>
+                <p className="text-slate-400 leading-relaxed text-lg">{event.description}</p>
+              </motion.section>
+            )}
 
             {/* Info Grid */}
             <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
@@ -218,7 +220,7 @@ export default function EventDetails() {
                   { icon: Users, label: 'Team Size', value: event.teamSize, color: 'teal' },
                   { icon: IndianRupee, label: 'Fee', value: getDisplayFee(event.id), color: 'amber' },
                   { icon: Trophy, label: 'Prize', value: event.prize, color: 'teal' },
-                ].map((item, i) => (
+                ].filter(item => item.value && String(item.value).trim() !== '' && item.value !== '—').map((item, i) => (
                   <motion.div
                     key={item.label}
                     className={`p-5 rounded-2xl border transition-all duration-300 hover:scale-[1.03] ${item.color === 'teal'
@@ -267,8 +269,15 @@ export default function EventDetails() {
                             }`}>
                             {index + 1}
                           </div>
-                          <div>
-                            <h3 className={`text-lg font-bold mb-2 ${isFilm ? 'text-amber-300' : 'text-teal-300'}`}>{round.title}</h3>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <h3 className={`text-lg font-bold ${isFilm ? 'text-amber-300' : 'text-teal-300'}`}>{round.title}</h3>
+                              {isFilm && (round as any).fee && (
+                                <span className="px-2.5 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/25 text-amber-300 text-xs font-bold">
+                                  ₹{(round as any).fee}
+                                </span>
+                              )}
+                            </div>
                             <p className="text-slate-400 leading-relaxed">{round.description}</p>
                           </div>
                         </div>
@@ -381,19 +390,21 @@ export default function EventDetails() {
             )}
 
             {/* Venue Detail */}
-            <motion.div
-              className="p-6 rounded-2xl border border-white/[0.06] bg-white/[0.02]"
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-            >
-              <div className="flex items-center gap-3 mb-2">
-                <MapPin className="w-5 h-5 text-teal-400" />
-                <span className="text-slate-400 text-sm uppercase tracking-wider font-medium">Venue</span>
-              </div>
-              <p className="text-white font-semibold text-lg">{event.location}</p>
-              <p className="text-slate-400 text-sm mt-1">{settings.venue || 'JBIET Campus, Moinabad, Hyderabad'}</p>
-            </motion.div>
+            {event.location && (
+              <motion.div
+                className="p-6 rounded-2xl border border-white/[0.06] bg-white/[0.02]"
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <MapPin className="w-5 h-5 text-teal-400" />
+                  <span className="text-slate-400 text-sm uppercase tracking-wider font-medium">Venue</span>
+                </div>
+                <p className="text-white font-semibold text-lg">{event.location}</p>
+                <p className="text-slate-400 text-sm mt-1">{settings.venue || 'JBIET Campus, Moinabad, Hyderabad'}</p>
+              </motion.div>
+            )}
           </div>
 
           {/* ─── Sidebar ─── */}

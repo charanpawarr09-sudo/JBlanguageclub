@@ -10,7 +10,7 @@
  *   pitch-perfect: flat=₹50
  *   open-mic: single=₹99, duo=₹150
  *   poetry-reciting: ₹99 per person (individual only)
- *   film-screening: ₹80 per crew member
+ *   film-screening: per-film price (stored in rounds JSONB), default ₹80
  */
 
 interface FeeRule {
@@ -25,7 +25,7 @@ const FEE_RULES: Record<string, FeeRule> = {
     'pitch-perfect': { eventId: 'pitch-perfect', minTeamSize: 1, maxTeamSize: 4 },
     'open-mic': { eventId: 'open-mic', minTeamSize: 1, maxTeamSize: 2 },
     'poetry-reciting': { eventId: 'poetry-reciting', minTeamSize: 1, maxTeamSize: 1 },
-    'film-screening': { eventId: 'film-screening', minTeamSize: 1, maxTeamSize: 10 },
+    'film-screening': { eventId: 'film-screening', minTeamSize: 1, maxTeamSize: 1 },
 };
 
 /**
@@ -34,9 +34,10 @@ const FEE_RULES: Record<string, FeeRule> = {
  *
  * @param eventId - The ID of the event
  * @param teamSize - Number of people in the team (minimum 1)
+ * @param roundFee - Optional per-round fee (from event rounds JSONB). For film-screening, overrides default.
  * @throws Error if eventId is unknown or teamSize is out of range
  */
-export function calculateFee(eventId: string, teamSize: number): number {
+export function calculateFee(eventId: string, teamSize: number, roundFee?: number): number {
     const rule = FEE_RULES[eventId];
     if (!rule) {
         throw new Error(`Unknown event: ${eventId}`);
@@ -66,7 +67,8 @@ export function calculateFee(eventId: string, teamSize: number): number {
             return 99 * teamSize; // Per person
 
         case 'film-screening':
-            return 80 * teamSize; // Per crew member
+            // If a per-round fee is provided (from the event's rounds JSONB), use it
+            return roundFee ?? 80;
 
         default:
             throw new Error(`Unknown event: ${eventId}`);

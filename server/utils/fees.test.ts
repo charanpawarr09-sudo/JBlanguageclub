@@ -72,10 +72,13 @@ describe('calculateFee', () => {
         expect(calculateFee('poetry-reciting', 1)).toBe(99);
     });
 
-    it('scales with team size for film-screening', () => {
+    it('returns default ₹80 for film-screening', () => {
         expect(calculateFee('film-screening', 1)).toBe(80);
-        expect(calculateFee('film-screening', 3)).toBe(240);
-        expect(calculateFee('film-screening', 5)).toBe(400);
+    });
+
+    it('uses roundFee when provided for film-screening', () => {
+        expect(calculateFee('film-screening', 1, 50)).toBe(50);
+        expect(calculateFee('film-screening', 1, 120)).toBe(120);
     });
 
     it('throws for unknown events', () => {

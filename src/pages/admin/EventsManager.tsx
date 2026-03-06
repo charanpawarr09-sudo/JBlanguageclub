@@ -13,7 +13,7 @@ interface EventData {
     date: string; time?: string; location?: string; category?: string;
     image?: string; banner_image?: string; thumbnail_image?: string;
     rules?: string[]; team_size?: string; prize?: string;
-    rounds?: Array<{ title: string; description: string }>;
+    rounds?: Array<{ title: string; description: string; fee?: number }>;
     registration_fee_single: number; registration_fee_team?: number | null;
     team_size_min: number; team_size_max: number;
     registration_enabled: boolean; is_published: boolean; is_archived?: boolean;
@@ -582,11 +582,21 @@ export default function EventsManager() {
                                                     updated[idx] = { ...updated[idx], title: e.target.value };
                                                     setForm({ ...form, rounds: updated });
                                                 }} className={inputCls} />
-                                                <textarea rows={2} placeholder="Round description / topic" value={round.description} onChange={e => {
-                                                    const updated = [...(form.rounds || [])];
-                                                    updated[idx] = { ...updated[idx], description: e.target.value };
-                                                    setForm({ ...form, rounds: updated });
-                                                }} className={inputCls} />
+                                                <div className="flex gap-2">
+                                                    <textarea rows={2} placeholder="Round description / topic" value={round.description} onChange={e => {
+                                                        const updated = [...(form.rounds || [])];
+                                                        updated[idx] = { ...updated[idx], description: e.target.value };
+                                                        setForm({ ...form, rounds: updated });
+                                                    }} className={inputCls + ' flex-1'} />
+                                                    <div className="w-24 flex-shrink-0">
+                                                        <label className="text-[10px] text-slate-500 mb-0.5 block">Fee (₹)</label>
+                                                        <input type="number" min={0} placeholder="—" value={round.fee ?? ''} onChange={e => {
+                                                            const updated = [...(form.rounds || [])];
+                                                            updated[idx] = { ...updated[idx], fee: e.target.value ? parseInt(e.target.value, 10) : undefined };
+                                                            setForm({ ...form, rounds: updated });
+                                                        }} className={inputCls + ' text-center'} />
+                                                    </div>
+                                                </div>
                                             </div>
                                         ))}
                                     </div>

@@ -223,9 +223,9 @@ const seedEvents = [
     prize: 'An Unforgettable Experience',
     google_form_url: null,
     rounds: [
-      { title: '🎬 Screening 1 — Chhichhore', description: 'A heartwarming Bollywood blockbuster that celebrates friendship, failure, and the spirit of never giving up. Relive the hostel days and learn that losers of today are the winners of tomorrow.' },
-      { title: '🎬 Screening 2 — Dead Poets Society', description: 'A timeless classic starring Robin Williams. A story about seizing the day, thinking for yourself, and the transformative power of poetry and education. "Carpe Diem!"' },
-      { title: '🎬 Screening 3 — To Be Announced', description: 'The final film is a surprise! Stay tuned — we\'re saving the best reveal for last. Follow our socials for the big announcement.' },
+      { title: '🎬 Screening 1 — Chhichhore', description: 'A heartwarming Bollywood blockbuster that celebrates friendship, failure, and the spirit of never giving up. Relive the hostel days and learn that losers of today are the winners of tomorrow.', fee: 50 },
+      { title: '🎬 Screening 2 — Dead Poets Society', description: 'A timeless classic starring Robin Williams. A story about seizing the day, thinking for yourself, and the transformative power of poetry and education. "Carpe Diem!"', fee: 50 },
+      { title: '🎬 Screening 3 — To Be Announced', description: 'The final film is a surprise! Stay tuned — we\'re saving the best reveal for last. Follow our socials for the big announcement.', fee: 50 },
     ],
     rules: [
       'Entry is on a first-come, first-served basis',

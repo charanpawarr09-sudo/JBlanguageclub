@@ -15,14 +15,23 @@ const router = Router();
 
 // Pre-register (with transaction for race condition fix #16)
 router.post('/api/registrations/pre-register', registrationLimiter, validate(preRegisterSchema), async (req: Request, res: Response) => {
-    const { event_id, team_size, primary_name, primary_email, primary_phone } = req.body;
+    const { event_id, team_size, primary_name, primary_email, primary_phone, selected_round_index } = req.body;
 
     try {
         const [event] = await db.select().from(schema.events).where(eq(schema.events.id, event_id)).limit(1);
         if (!event) { res.status(404).json({ error: 'Event not found' }); return; }
         if (!event.registration_enabled) { res.status(400).json({ error: 'Registration is closed for this event' }); return; }
 
-        const feeINR = calculateFee(event_id, team_size);
+        // For film-screening with per-round pricing, look up the round's fee
+        let roundFee: number | undefined;
+        if (event_id === 'film-screening' && selected_round_index !== undefined && selected_round_index !== null) {
+            const rounds = (event as any).rounds as Array<{ title: string; description: string; fee?: number }> | null;
+            if (rounds && rounds[selected_round_index] && rounds[selected_round_index].fee) {
+                roundFee = rounds[selected_round_index].fee;
+            }
+        }
+
+        const feeINR = calculateFee(event_id, team_size, roundFee);
         const amountPaise = toPaise(feeINR);
         const registrationCode = generateRegistrationCode();
 
