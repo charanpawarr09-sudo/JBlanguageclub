@@ -21,6 +21,34 @@ interface ScheduleEvent {
   team_size_max: number;
 }
 
+/**
+ * Parse any date string into a Date object.
+ * Handles ISO "2026-03-16", "March 16, 2026", "16 March, 2026", etc.
+ */
+function parseDate(raw: string): Date {
+  const d = new Date(raw);
+  if (!isNaN(d.getTime())) return d;
+  return new Date(NaN);
+}
+
+/**
+ * Format a date string into a consistent display format: "March 16, 2026"
+ */
+function formatDate(raw: string): string {
+  const d = parseDate(raw);
+  if (isNaN(d.getTime())) return raw; // fallback to original if unparseable
+  return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+}
+
+/**
+ * Normalize a date string to a canonical ISO key (YYYY-MM-DD) for deduplication.
+ */
+function dateKey(raw: string): string {
+  const d = parseDate(raw);
+  if (isNaN(d.getTime())) return raw;
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
 export default function Schedule() {
   const [events, setEvents] = useState<ScheduleEvent[]>([]);
   const [loading, setLoading] = useState(true);
@@ -47,26 +75,29 @@ export default function Schedule() {
     fetchEvents();
   }, []);
 
-  // Dynamically extract unique dates and build day tabs
+  // Dynamically extract unique dates (deduplicated by canonical ISO key) and build day tabs
   const uniqueDates = useMemo(() => {
-    const dates: string[] = [...new Set<string>(events.map(e => e.date))];
-    // Try to sort chronologically; if dates are like "March 16, 2026" use Date.parse
-    dates.sort((a, b) => {
-      const da = new Date(a).getTime();
-      const db = new Date(b).getTime();
-      if (!isNaN(da) && !isNaN(db)) return da - db;
-      return a.localeCompare(b);
-    });
-    return dates;
+    const seen = new Set<string>();
+    const keys: string[] = [];
+    for (const e of events) {
+      const key = dateKey(e.date);
+      if (!seen.has(key)) {
+        seen.add(key);
+        keys.push(key);
+      }
+    }
+    // Sort chronologically by ISO key
+    keys.sort();
+    return keys;
   }, [events]);
 
   const dayTabs = useMemo(() => {
     const tabs = [{ key: 'all', label: 'All Days', sublabel: uniqueDates.length > 0 ? `${uniqueDates.length} days` : '' }];
-    uniqueDates.forEach((date, index) => {
+    uniqueDates.forEach((isoKey, index) => {
       tabs.push({
         key: `day${index + 1}`,
         label: `Day ${index + 1}`,
-        sublabel: date,
+        sublabel: formatDate(isoKey),
       });
     });
     return tabs;
@@ -74,10 +105,9 @@ export default function Schedule() {
 
   const sortedEvents = useMemo(() => {
     return [...events].sort((a, b) => {
-      const da = new Date(a.date).getTime();
-      const db = new Date(b.date).getTime();
-      if (!isNaN(da) && !isNaN(db) && da !== db) return da - db;
-      if (a.date !== b.date) return a.date.localeCompare(b.date);
+      const ka = dateKey(a.date);
+      const kb = dateKey(b.date);
+      if (ka !== kb) return ka.localeCompare(kb);
       return (a.time || '').localeCompare(b.time || '');
     });
   }, [events]);
@@ -85,9 +115,9 @@ export default function Schedule() {
   const filteredEvents = useMemo(() => {
     if (activeDay === 'all') return sortedEvents;
     const dayIndex = parseInt(activeDay.replace('day', '')) - 1;
-    const targetDate = uniqueDates[dayIndex];
-    if (!targetDate) return sortedEvents;
-    return sortedEvents.filter(e => e.date === targetDate);
+    const targetKey = uniqueDates[dayIndex];
+    if (!targetKey) return sortedEvents;
+    return sortedEvents.filter(e => dateKey(e.date) === targetKey);
   }, [sortedEvents, activeDay, uniqueDates]);
 
   const getDescription = (e: ScheduleEvent) => e.short_description || e.shortDescription || '';
@@ -221,7 +251,7 @@ export default function Schedule() {
                             <span className="px-3 py-1 bg-teal-900/50 text-teal-300 text-xs font-bold rounded-full uppercase tracking-wider">
                               {event.category}
                             </span>
-                            <span className="text-slate-500 text-sm font-[var(--font-mono)]">{event.date}</span>
+                            <span className="text-slate-500 text-sm font-[var(--font-mono)]">{formatDate(event.date)}</span>
                           </div>
 
                           <h3 className="text-xl font-bold mb-2 text-white">{event.title}</h3>
