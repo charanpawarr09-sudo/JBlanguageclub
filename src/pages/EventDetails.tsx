@@ -198,8 +198,8 @@ export default function EventDetails() {
 
       {/* ─── Content ─── */}
       <div className="container mx-auto px-4 py-14 relative">
-        <div className="grid lg:grid-cols-3 gap-14">
-          <div className="lg:col-span-2 space-y-14">
+        <div className="grid lg:grid-cols-[1fr_340px] gap-10">
+          <div className="space-y-14">
             {/* About */}
             <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
               <h2 className="text-2xl font-bold mb-5 text-white" style={{ fontFamily: 'var(--font-heading)' }}>About the Event</h2>
@@ -252,8 +252,8 @@ export default function EventDetails() {
                       <motion.div
                         key={index}
                         className={`p-6 rounded-2xl border transition-all ${isFilm
-                            ? 'border-amber-500/15 bg-amber-500/[0.03] hover:border-amber-500/30'
-                            : 'border-white/[0.06] bg-white/[0.02] hover:border-teal-500/20'
+                          ? 'border-amber-500/15 bg-amber-500/[0.03] hover:border-amber-500/30'
+                          : 'border-white/[0.06] bg-white/[0.02] hover:border-teal-500/20'
                           }`}
                         initial={{ opacity: 0, x: -10 }}
                         whileInView={{ opacity: 1, x: 0 }}
@@ -262,8 +262,8 @@ export default function EventDetails() {
                       >
                         <div className="flex items-start gap-4">
                           <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0 ${isFilm
-                              ? 'bg-gradient-to-br from-amber-500 to-orange-600'
-                              : 'bg-gradient-to-br from-teal-500 to-teal-700'
+                            ? 'bg-gradient-to-br from-amber-500 to-orange-600'
+                            : 'bg-gradient-to-br from-teal-500 to-teal-700'
                             }`}>
                             {index + 1}
                           </div>
