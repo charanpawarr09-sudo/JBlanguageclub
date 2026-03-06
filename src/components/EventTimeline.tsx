@@ -44,14 +44,14 @@ const fallbackDays: DayGroup[] = [
         day: 'Day 2', date: 'March 17', color: 'amber',
         events: [
             { time: '10:00 AM', title: 'Open Mic', icon: Mic, desc: 'Your stage, your voice', slug: 'open-mic' },
-            { time: '1:00 PM', title: 'Treasure Hunt', icon: Search, desc: 'Campus-wide adventure', slug: 'treasure-hunt' },
+            { time: '1:00 PM', title: 'Film Screening', icon: BookOpen, desc: '3 iconic movies back-to-back', slug: 'film-screening' },
             { time: '3:30 PM', title: 'Debate Semi-Finals', icon: BookOpen, desc: 'Best minds clash', slug: 'debate-competition' },
         ],
     },
     {
         day: 'Day 3', date: 'March 18', color: 'violet',
         events: [
-            { time: '10:00 AM', title: 'Grand Finale', icon: Trophy, desc: 'Finals across all events' },
+            { time: '10:00 AM', title: 'Debate Grand Finale', icon: BookOpen, desc: 'Championship round', slug: 'debate-competition' },
             { time: '2:00 PM', title: 'Awards Ceremony', icon: Trophy, desc: 'Gifts & surprises' },
             { time: '4:00 PM', title: 'Closing Ceremony', icon: Calendar, desc: 'Until next year!' },
         ],

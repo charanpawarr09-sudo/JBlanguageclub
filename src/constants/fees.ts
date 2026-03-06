@@ -73,8 +73,8 @@ export const REGISTRATION_FEES: Record<string, EventFeeConfig> = {
         singleFee: 80,
         teamFee: null,
         minTeamSize: 1,
-        maxTeamSize: 10,
-        description: '₹80 per crew member',
+        maxTeamSize: 1,
+        description: '₹80 per person',
     },
 };
 

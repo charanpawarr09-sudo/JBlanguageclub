@@ -49,7 +49,7 @@ export const events: VoxeraEvent[] = [
     id: 'debate-competition',
     title: 'Debate Competition',
     shortDescription: 'Voice your opinion and win the argument.',
-    description: 'Words have power — and at VOXERA, we turn opinions into impact. The Debate Competition at VOXERA is a dynamic platform where ideas clash, perspectives evolve, and voices rise with confidence. Whether you\'re a seasoned debater or a first-time orator, this is your stage to speak truth to power and challenge the status quo.',
+    description: 'Words have power — and at VOXERA, we turn opinions into impact. The Debate Competition at VOXERA is a dynamic platform where ideas clash, perspectives evolve, and voices rise with confidence. Whether you\'re a seasoned debater or a first-time orator, this is your stage to speak truth to power and challenge the status quo. Compete across 3 intense rounds on thought-provoking topics that matter today.',
     date: 'March 16, 2026',
     time: '10:00 AM - 1:00 PM',
     location: 'Seminar Hall',
@@ -69,9 +69,9 @@ export const events: VoxeraEvent[] = [
     teamSize: '1-2',
     prize: 'Exciting Gifts + Certificate',
     rounds: [
-      { title: 'Round 1 — Preliminary', description: 'Topic assigned; individual judging; top performers advance.' },
-      { title: 'Round 2 — Semi-Final', description: 'Elevated difficulty; new topic; evaluated on argumentation depth.' },
-      { title: 'Round 3 — Final', description: 'Championship round; new topic; full judging panel.' }
+      { title: 'Round 1 — Preliminary', description: 'Is Gen Z More Socially Responsible Than Millennials? Individual judging; top performers advance to the next round.' },
+      { title: 'Round 2 — Semi-Final', description: 'Is Media Still the Fourth Pillar of Democracy? Elevated difficulty; evaluated on argumentation depth and rebuttals.' },
+      { title: 'Round 3 — Grand Finale', description: 'Is Marriage Becoming Obsolete in Modern Society? Championship round with the full judging panel.' }
     ],
     registration_fee_single: 99,
     registration_fee_team: 150,
@@ -216,33 +216,39 @@ export const events: VoxeraEvent[] = [
   {
     id: 'film-screening',
     title: 'Film Screening',
-    shortDescription: 'Showcase of student short films.',
-    description: 'Watch the best short films created by students. A celebration of cinema and storytelling. Submit your short film and compete for the Best Film trophy!',
+    shortDescription: 'Three iconic films. One unforgettable experience. Grab your popcorn.',
+    description: 'VOXERA presents an exclusive Film Screening event — a cinematic journey featuring three carefully curated films that celebrate friendship, ambition, and the power of thinking differently. Sit back, relax, and let the magic of cinema inspire you.',
     date: 'March 17, 2026',
-    time: '6:00 PM - 9:00 PM',
+    time: '1:00 PM - 7:00 PM',
     location: 'Main Auditorium',
     category: 'Cultural',
     image: 'https://images.unsplash.com/photo-1524712245354-2c4e5e7121c0?auto=format&fit=crop&w=800&q=80',
     banner_image: 'https://images.unsplash.com/photo-1524712245354-2c4e5e7121c0?auto=format&fit=crop&w=1600&q=80',
     thumbnail_image: 'https://images.unsplash.com/photo-1524712245354-2c4e5e7121c0?auto=format&fit=crop&w=400&q=80',
     rules: [
-      'Short films must be under 20 minutes.',
-      'Submit your film before the deadline.',
-      'Q&A with directors after screening.',
-      'Original content only — no plagiarism.'
+      'Entry is on a first-come, first-served basis.',
+      'Maintain silence during screenings.',
+      'No recording or photography during the films.',
+      'Discussion sessions may follow each screening.',
+      'Food and beverages may be available at the venue.'
     ],
-    teamSize: 'Crew (up to 10)',
-    prize: 'Best Film Trophy + Certificate',
+    teamSize: 'Individual',
+    prize: 'An Unforgettable Experience',
+    rounds: [
+      { title: '🎬 Screening 1 — Chhichhore', description: 'A heartwarming Bollywood blockbuster that celebrates friendship, failure, and the spirit of never giving up. Relive the hostel days and learn that losers of today are the winners of tomorrow.' },
+      { title: '🎬 Screening 2 — Dead Poets Society', description: 'A timeless classic starring Robin Williams. A story about seizing the day, thinking for yourself, and the transformative power of poetry and education. "Carpe Diem!"' },
+      { title: '🎬 Screening 3 — To Be Announced', description: 'The final film is a surprise! Stay tuned — we\'re saving the best reveal for last. Follow our socials for the big announcement.' }
+    ],
     registration_fee_single: 80,
     registration_fee_team: null,
     team_size_min: 1,
-    team_size_max: 10,
+    team_size_max: 1,
     registration_enabled: true,
     is_published: true,
-    google_form_url: null, // TODO: Add Google Form URL when available
+    google_form_url: null,
     slots_total: null,
     slots_filled: 0,
-    judging_criteria: ['Storyline & Script', 'Cinematography', 'Editing Quality', 'Acting & Direction', 'Sound Design', 'Overall Impact'],
+    judging_criteria: [],
     coordinators: []
   }
 ];

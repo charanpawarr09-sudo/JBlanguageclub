@@ -239,31 +239,42 @@ export default function EventDetails() {
               </div>
             </motion.section>
 
-            {/* Rounds */}
+            {/* Rounds / Screenings */}
             {event.rounds && event.rounds.length > 0 && (
               <section>
-                <h2 className="text-2xl font-bold mb-6 text-white" style={{ fontFamily: 'var(--font-heading)' }}>Competition Rounds</h2>
+                <h2 className="text-2xl font-bold mb-6 text-white" style={{ fontFamily: 'var(--font-heading)' }}>
+                  {event.id === 'film-screening' ? '🎬 Movie Lineup' : 'Competition Rounds'}
+                </h2>
                 <div className="space-y-4">
-                  {event.rounds.map((round, index) => (
-                    <motion.div
-                      key={index}
-                      className="p-6 rounded-2xl border border-white/[0.06] bg-white/[0.02] hover:border-teal-500/20 transition-all"
-                      initial={{ opacity: 0, x: -10 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: index * 0.08 }}
-                    >
-                      <div className="flex items-start gap-4">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-teal-500 to-teal-700 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
-                          {index + 1}
+                  {event.rounds.map((round, index) => {
+                    const isFilm = event.id === 'film-screening';
+                    return (
+                      <motion.div
+                        key={index}
+                        className={`p-6 rounded-2xl border transition-all ${isFilm
+                            ? 'border-amber-500/15 bg-amber-500/[0.03] hover:border-amber-500/30'
+                            : 'border-white/[0.06] bg-white/[0.02] hover:border-teal-500/20'
+                          }`}
+                        initial={{ opacity: 0, x: -10 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: index * 0.08 }}
+                      >
+                        <div className="flex items-start gap-4">
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0 ${isFilm
+                              ? 'bg-gradient-to-br from-amber-500 to-orange-600'
+                              : 'bg-gradient-to-br from-teal-500 to-teal-700'
+                            }`}>
+                            {index + 1}
+                          </div>
+                          <div>
+                            <h3 className={`text-lg font-bold mb-2 ${isFilm ? 'text-amber-300' : 'text-teal-300'}`}>{round.title}</h3>
+                            <p className="text-slate-400 leading-relaxed">{round.description}</p>
+                          </div>
                         </div>
-                        <div>
-                          <h3 className="text-lg font-bold text-teal-300 mb-2">{round.title}</h3>
-                          <p className="text-slate-400 leading-relaxed">{round.description}</p>
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
+                      </motion.div>
+                    );
+                  })}
                 </div>
               </section>
             )}

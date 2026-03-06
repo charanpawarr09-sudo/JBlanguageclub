@@ -56,7 +56,7 @@ const FEE_DESCRIPTIONS: Record<string, string> = {
   'pitch-perfect': '₹50 flat',
   'open-mic': '₹99 solo / ₹150 duo',
   'treasure-hunt': '₹120 per person',
-  'film-screening': '₹80 per crew member',
+  'film-screening': '₹80 per person',
 };
 
 /* ─────── Load Razorpay script ─────── */
