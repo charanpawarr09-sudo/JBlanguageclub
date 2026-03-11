@@ -1,0 +1,283 @@
+# VOXERA 2026 — Deployment Guide, File Cleanup & Suggestions
+
+---
+
+## Part 1: Deployment Guide
+
+### Architecture Overview
+
+Your VOXERA 2026 website is a **split architecture**:
+
+| Component | Technology | What it does |
+|-----------|-----------|--------------|
+| **Frontend** | Vite + React + Tailwind v4 | SPA served as static files |
+| **Backend** | Express + Drizzle ORM | REST API server ([server/index.ts](file:///c:/Users/chara/Downloads/vzzz13/server/index.ts)) |
+| **Database** | PostgreSQL (Neon) | Cloud-hosted PostgreSQL |
+| **Payments** | Razorpay | Payment gateway integration |
+| **Email** | Resend | Transactional emails |
+
+---
+
+### Step 1: Environment Variables
+
+Create a [.env](file:///c:/Users/chara/Downloads/vzzz13/.env) file (or set env vars in your hosting platform) with these values:
+
+```env
+# Database (Neon PostgreSQL)
+DATABASE_URL=postgresql://user:pass@host/dbname?sslmode=require
+
+# Auth
+JWT_SECRET=<random-64-char-hex-string>
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD_HASH=<bcrypt-hash-of-your-password>
+
+# Email (Resend)
+RESEND_API_KEY=re_xxxx
+FROM_EMAIL=VOXERA <noreply@yourdomain.com>
+ADMIN_EMAIL=your@email.com
+
+# Razorpay (if using payments)
+RAZORPAY_KEY_ID=rzp_live_xxxx
+RAZORPAY_KEY_SECRET=xxxx
+
+# App Config
+FRONTEND_URL=https://yourdomain.com
+PORT=3000
+NODE_ENV=production
+WEBHOOK_SECRET=<random-secret>
+
+# Frontend (used by Vite at build time)
+VITE_API_BASE_URL=https://your-api-domain.com
+```
+
+> [!IMPORTANT]
+> Generate a new `JWT_SECRET` with: `node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"`
+> Generate a new `ADMIN_PASSWORD_HASH` with: `node -e "require('bcryptjs').hash('YOUR_PASSWORD', 12).then(h => console.log(h))"`
+
+---
+
+### Step 2: Database Setup
+
+Your database is already on **Neon** (cloud PostgreSQL). Push your schema:
+
+```bash
+# Push schema to the database
+npm run db:push
+
+# (Optional) Seed initial data
+npm run db:seed
+```
+
+---
+
+### Step 3: Local Development
+
+```bash
+# Install dependencies
+npm install
+
+# Terminal 1: Start the Vite dev server (frontend)
+npm run dev
+
+# Terminal 2: Start the Express API server (backend)
+npm run server
+```
+
+- Frontend: `http://localhost:5173`
+- Backend API: `http://localhost:3000`
+- Vite proxies `/api/*` requests to port 3000 automatically
+
+---
+
+### Step 4: Deployment Options
+
+#### Option A: Vercel (Frontend) + Railway/Render (Backend) — **Recommended**
+
+**Frontend on Vercel:**
+
+1. Push your code to a GitHub repo
+2. Go to [vercel.com](https://vercel.com) → Import project
+3. Set:
+   - **Framework**: Vite
+   - **Build command**: `npm run build`
+   - **Output directory**: `dist`
+4. Add environment variable:
+   - `VITE_API_BASE_URL` = `https://your-api-server.com`
+5. Deploy — Vercel will handle the [vercel.json](file:///c:/Users/chara/Downloads/vzzz13/vercel.json) rewrites for SPA routing
+
+**Backend on Railway:**
+
+1. Go to [railway.app](https://railway.app) → New project → Deploy from GitHub
+2. Set root directory to project root
+3. Set:
+   - **Start command**: `npx tsx server/index.ts`
+4. Add all environment variables from Step 1
+5. Set `NODE_ENV=production` and `FRONTEND_URL=https://your-vercel-domain.com`
+
+**Backend on Render:**
+
+1. Go to [render.com](https://render.com) → New → Web Service
+2. Connect your GitHub repo
+3. Set:
+   - **Build command**: `npm install`
+   - **Start command**: `npx tsx server/index.ts`
+4. Add all environment variables
+
+#### Option B: Single Server (VPS/DigitalOcean)
+
+```bash
+# On your VPS
+git clone your-repo
+cd your-repo
+npm install
+npm run build        # Build the frontend
+
+# Set NODE_ENV=production in .env
+# The server will serve static files from dist/ in production mode
+npx tsx server/index.ts
+```
+
+Use **PM2** for process management:
+```bash
+npm install -g pm2
+pm2 start "npx tsx server/index.ts" --name voxera-api
+pm2 save
+pm2 startup
+```
+
+Use **Nginx** as reverse proxy:
+```nginx
+server {
+    listen 80;
+    server_name yourdomain.com;
+
+    location /api/ {
+        proxy_pass http://localhost:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+
+    location / {
+        root /path/to/your/dist;
+        try_files $uri /index.html;
+    }
+}
+```
+
+#### Option C: Docker
+
+Create a `Dockerfile`:
+```dockerfile
+FROM node:20-slim
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --production
+COPY . .
+RUN npm run build
+EXPOSE 3000
+ENV NODE_ENV=production
+CMD ["npx", "tsx", "server/index.ts"]
+```
+
+---
+
+### Step 5: Post-Deployment Checklist
+
+- [ ] Verify `https://yourdomain.com` loads the website
+- [ ] Verify `https://yourdomain.com/api/health` returns `{ status: "ok" }`
+- [ ] Test admin login at `/admin/login`
+- [ ] Test event listing at `/events`
+- [ ] Verify CORS — `FRONTEND_URL` in backend env must match your actual frontend URL
+- [ ] Test contact form submission
+- [ ] Test registration flow (if Razorpay is configured)
+- [ ] Check that uploaded images work at `/uploads/*`
+
+---
+
+## Part 2: Files to Delete (Safe Cleanup)
+
+> [!WARNING]
+> Before deleting, make sure you have a git commit or backup of the current state.
+
+### Files Safe to Delete
+
+| File/Folder | Reason | Risk |
+|------------|--------|------|
+| [server.ts](file:///c:/Users/chara/Downloads/vzzz13/server.ts) (root) | Legacy SQLite-based server, completely replaced by [server/index.ts](file:///c:/Users/chara/Downloads/vzzz13/server/index.ts) | ✅ None — `npm run server` uses [server/index.ts](file:///c:/Users/chara/Downloads/vzzz13/server/index.ts) |
+| [voxera.db](file:///c:/Users/chara/Downloads/vzzz13/voxera.db) | SQLite database file from the old server, no longer used | ✅ None — using PostgreSQL now |
+| `dist/` | Stale build output, regenerated with `npm run build` | ✅ None — auto-generated |
+| [metadata.json](file:///c:/Users/chara/Downloads/vzzz13/metadata.json) | Unknown/orphan file, not referenced anywhere in code | ✅ None |
+| [DESIGN.md](file:///c:/Users/chara/Downloads/vzzz13/DESIGN.md) (109 KB) | Internal spec doc, not needed in production | ⚠️ Keep if you need as reference |
+| [PRD.md](file:///c:/Users/chara/Downloads/vzzz13/PRD.md) (66 KB) | Product requirements doc, not needed in production | ⚠️ Keep if you need as reference |
+| [TECH_RULES.md](file:///c:/Users/chara/Downloads/vzzz13/TECH_RULES.md) (51 KB) | Technical rules doc, not needed in production | ⚠️ Keep if you need as reference |
+| [TASKS.md](file:///c:/Users/chara/Downloads/vzzz13/TASKS.md) (18 KB) | Old todo list, mostly completed work | ⚠️ Keep if you need as reference |
+| [VOXERA_Admin_Panel_PRD.md](file:///c:/Users/chara/Downloads/vzzz13/VOXERA_Admin_Panel_PRD.md) (38 KB) | Admin panel spec, not needed in production | ⚠️ Keep if you need as reference |
+
+### What NOT to Delete
+
+| File/Folder | Reason |
+|------------|--------|
+| `server/` folder | This is your REAL backend server |
+| [src/data/events.ts](file:///c:/Users/chara/Downloads/vzzz13/src/data/events.ts) | Imported by [server/index.ts](file:///c:/Users/chara/Downloads/vzzz13/server/index.ts) for seeding + used for TypeScript interface |
+| [public/jblc-logo.png](file:///c:/Users/chara/Downloads/vzzz13/public/jblc-logo.png) | Used logo asset |
+| [public/robots.txt](file:///c:/Users/chara/Downloads/vzzz13/public/robots.txt) | SEO file |
+| [public/sitemap.xml](file:///c:/Users/chara/Downloads/vzzz13/public/sitemap.xml) | SEO file |
+| `public/uploads/` | Directory for uploaded images (empty for now but needed at runtime) |
+| `drizzle.config.ts` | Needed for database migrations |
+| `vercel.json` | Needed for Vercel deployment |
+
+---
+
+## Part 3: Website Improvement Suggestions
+
+### 🔴 Critical (Security & Stability)
+
+1. **`.env` file is committed** — Your `.env` contains **real database credentials, API keys, and password hashes**. Even though `.gitignore` lists `.env*`, if this was committed before `.gitignore` was set up, it's still in git history. **Action**: Create `.env.example` with placeholder values, and if credentials are in git history, rotate them all.
+
+2. **No `.env.example`** — New developers (or deployments) have no template for required env vars. Create one.
+
+3. **`strict: false` in tsconfig** — TypeScript is basically running in "ignore errors" mode. This hides real bugs. Consider switching to `strict: true` gradually.
+
+### 🟠 High Priority
+
+4. **No image optimization** — Images are saved as-is in `public/uploads/`. Consider using `sharp` to resize/compress on upload, or use a CDN like Cloudinary/ImageKit.
+
+5. **Missing error boundaries** — If any React component throws, the whole app crashes. Add `<ErrorBoundary>` components.
+
+6. **No loading states on API calls** — Some pages may flash empty or show partially loaded content.
+
+7. **CORS is hardcoded to single origin** — If you deploy frontend and backend on different domains, update CORS config accordingly.
+
+### 🟡 Medium Priority
+
+8. **Add a favicon** — The site likely shows the default browser icon. Add a custom VOXERA favicon.
+
+9. **Add OG image** — Social media shares will look generic without a proper Open Graph banner image (`public/og-banner.jpg`, 1200×630px).
+
+10. **Add `prefers-reduced-motion` support** — Users who prefer reduced motion should get a less animated experience. Add this CSS rule to `index.css`.
+
+11. **Database connection pooling** — Your pool max is 10, which is fine for moderate traffic. If you expect spikes, consider increasing this or using Neon's connection pooler.
+
+12. **Add health check endpoint monitoring** — Set up an uptime monitor (e.g., UptimeRobot, free) on `/api/health`.
+
+### 🔵 Nice to Have
+
+13. **PWA support** — Add a `manifest.json` and service worker for offline capability and "Add to Home Screen".
+
+14. **Lighthouse audit** — Run a Lighthouse performance audit and address any major issues (lazy image loading, font display swap, etc.).
+
+15. **Analytics** — If not already set up, add Google Analytics 4 or a privacy-friendly alternative like Plausible/Umami.
+
+16. **Rate limiting on contact form** — Prevent spam by adding rate limiting to the `POST /api/contact` endpoint (you already have rate limiters for auth and registration).
+
+---
+
+## Verification Plan
+
+After deleting files:
+1. Run `npm run dev` — frontend should start without errors
+2. Run `npm run server` — backend should start without errors
+3. Visit `http://localhost:5173` — homepage should load
+4. Visit `http://localhost:5173/events` — events page should work
+5. Visit `http://localhost:5173/admin/login` — admin login should work
+6. Run `npm run build` — production build should succeed with no errors

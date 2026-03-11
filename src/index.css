@@ -1,0 +1,685 @@
+/* Google Fonts — Literary & Elegant */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600;1,700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&display=swap');
+
+@import "tailwindcss";
+
+/* ─── Design Tokens ─── */
+:root {
+  --bg-primary: #030712;
+  --bg-secondary: #0a1a1a;
+  --bg-elevated: #0d2f2f;
+  --border-default: #1a3333;
+  --border-glow: rgba(20, 120, 110, 0.3);
+  --accent-primary: #14786e;
+  --accent-hover: #0d6b62;
+  --accent-secondary: #c5a55a;
+  --accent-soft: #5cb8b2;
+  --accent-glow: rgba(20, 120, 110, 0.15);
+  --text-primary: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --text-muted: #475569;
+  --semantic-success: #10B981;
+  --semantic-error: #F43F5E;
+  --semantic-warning: #F59E0B;
+  --shadow-glow: 0 0 20px rgba(20, 120, 110, 0.4), 0 0 60px rgba(20, 120, 110, 0.15);
+  --border-radius-card: 16px;
+
+  --font-display: 'Playfair Display', serif;
+  --font-accent: 'Cormorant Garamond', serif;
+  --font-heading: 'DM Sans', 'Inter', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+/* ─── Base Styles ─── */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+  }
+
+  body {
+    @apply bg-slate-950 text-slate-200 antialiased selection:bg-teal-500/30 selection:text-teal-200;
+    font-family: var(--font-body);
+    -webkit-tap-highlight-color: transparent;
+    overflow-x: hidden;
+    touch-action: manipulation;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-heading);
+  }
+
+  /* ─── Fluid Typography ─── */
+  h1 {
+    font-size: clamp(2rem, 5vw + 1rem, 5rem);
+  }
+
+  h2 {
+    font-size: clamp(1.75rem, 4vw + 0.5rem, 3.75rem);
+  }
+
+  h3 {
+    font-size: clamp(1.25rem, 2vw + 0.5rem, 2rem);
+  }
+}
+
+/* ─── Mobile Touch Feedback ─── */
+@media (max-width: 767px) {
+
+  a,
+  button {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Cards & interactive elements get press feedback */
+  .touch-feedback {
+    transition: transform 0.15s ease;
+  }
+
+  .touch-feedback:active {
+    transform: scale(0.97);
+  }
+}
+
+/* ─── Scrollbar Hide (for horizontal scroll) ─── */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* ─── GPU Acceleration & Performance ─── */
+/* Isolate section layouts to prevent full-page repaints */
+section {
+  contain: layout style;
+}
+
+/* Force GPU layer for animated elements */
+.float-orb,
+.glow-pulse,
+[class*="animate-"] {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* ─── Float Particle (pure CSS, GPU-composited) ─── */
+@keyframes float-particle {
+
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.2;
+  }
+
+  25% {
+    transform: translate(25px, -50px) scale(1.3);
+    opacity: 0.6;
+  }
+
+  50% {
+    transform: translate(-20px, 15px) scale(0.9);
+    opacity: 0.3;
+  }
+
+  75% {
+    transform: translate(30px, -35px) scale(1.2);
+    opacity: 0.7;
+  }
+}
+
+.animate-float-particle {
+  animation: float-particle 20s ease-in-out infinite;
+}
+
+/* ─── Floating Orb animations (pure CSS, zero JS cost) ─── */
+@keyframes float-orb-1 {
+
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  50% {
+    transform: translate(20px, -35px) scale(1.1);
+  }
+}
+
+@keyframes float-orb-2 {
+
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  50% {
+    transform: translate(-25px, 45px) scale(1.15);
+  }
+}
+
+@keyframes float-orb-3 {
+
+  0%,
+  100% {
+    transform: translate(-50%, -50%) translate(0, 0);
+  }
+
+  50% {
+    transform: translate(-50%, -50%) translate(15px, -20px);
+  }
+}
+
+.animate-float-orb-1 {
+  animation: float-orb-1 10s ease-in-out infinite;
+}
+
+.animate-float-orb-2 {
+  animation: float-orb-2 12s ease-in-out 3s infinite;
+}
+
+.animate-float-orb-3 {
+  animation: float-orb-3 14s ease-in-out 5s infinite;
+}
+
+/* ─── Utility Classes ─── */
+
+/* Aurora background animation */
+.aurora-bg {
+  position: relative;
+  overflow: hidden;
+}
+
+.aurora-bg::before {
+  content: '';
+  position: absolute;
+  inset: -50%;
+  background: radial-gradient(ellipse at 20% 50%, rgba(20, 120, 110, 0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 50%, rgba(197, 165, 90, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 0%, rgba(92, 184, 178, 0.1) 0%, transparent 60%);
+  animation: aurora-shift 12s ease-in-out infinite alternate;
+  z-index: 0;
+  pointer-events: none;
+}
+
+@keyframes aurora-shift {
+  0% {
+    transform: translate(0, 0) rotate(0deg) scale(1);
+  }
+
+  50% {
+    transform: translate(2%, -3%) rotate(1deg) scale(1.05);
+  }
+
+  100% {
+    transform: translate(-2%, 3%) rotate(-1deg) scale(1);
+  }
+}
+
+/* Glassmorphism card */
+.glass-card {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 1.25rem;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(20, 120, 110, 0.3);
+}
+
+/* Gradient border */
+.gradient-border {
+  position: relative;
+  border-radius: var(--border-radius-card);
+  background-clip: padding-box;
+  border: 1px solid transparent;
+}
+
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(20, 120, 110, 0.4), rgba(197, 165, 90, 0.3));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* ─── PREMIUM: Animated rotating gradient border ─── */
+.animated-border {
+  position: relative;
+  border-radius: 1.25rem;
+  overflow: hidden;
+}
+
+.animated-border::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  background: conic-gradient(from var(--angle, 0deg), transparent 30%, rgba(20, 120, 110, 0.6), rgba(197, 165, 90, 0.4), transparent 70%);
+  border-radius: inherit;
+  animation: border-rotate 4s linear infinite;
+  z-index: -1;
+}
+
+.animated-border::after {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  background: var(--bg-primary);
+  border-radius: inherit;
+  z-index: -1;
+}
+
+@property --angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes border-rotate {
+  to {
+    --angle: 360deg;
+  }
+}
+
+/* ─── PREMIUM: Shimmer effect for loading ─── */
+@keyframes shimmer {
+  0% {
+    background-position: -200% center;
+  }
+
+  100% {
+    background-position: 200% center;
+  }
+}
+
+.shimmer {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.04) 50%, rgba(255, 255, 255, 0) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+/* ─── PREMIUM: Floating orbs ─── */
+@keyframes float-orb {
+
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  25% {
+    transform: translate(30px, -40px) scale(1.1);
+  }
+
+  50% {
+    transform: translate(-20px, -70px) scale(0.95);
+  }
+
+  75% {
+    transform: translate(40px, -30px) scale(1.05);
+  }
+}
+
+.float-orb {
+  animation: float-orb 20s ease-in-out infinite;
+}
+
+.float-orb-delay-1 {
+  animation-delay: -5s;
+}
+
+.float-orb-delay-2 {
+  animation-delay: -10s;
+}
+
+.float-orb-delay-3 {
+  animation-delay: -15s;
+}
+
+/* ─── PREMIUM: Glow pulse ─── */
+@keyframes glow-pulse {
+
+  0%,
+  100% {
+    box-shadow: 0 0 20px rgba(20, 120, 110, 0.2), 0 0 40px rgba(20, 120, 110, 0.1);
+  }
+
+  50% {
+    box-shadow: 0 0 30px rgba(20, 120, 110, 0.4), 0 0 60px rgba(20, 120, 110, 0.2);
+  }
+}
+
+.glow-pulse {
+  animation: glow-pulse 3s ease-in-out infinite;
+}
+
+/* ─── PREMIUM: Text gradient animation ─── */
+@keyframes gradient-text-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.gradient-text-animated {
+  background: linear-gradient(90deg, #F8FAFC, #5cb8b2, #c5a55a, #5cb8b2, #F8FAFC);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradient-text-flow 6s ease-in-out infinite;
+}
+
+/* Teal glow */
+.glow-violet {
+  box-shadow: 0 0 20px rgba(20, 120, 110, 0.4), 0 0 60px rgba(20, 120, 110, 0.15);
+}
+
+/* Gradient title text */
+.gradient-title {
+  background: linear-gradient(to right, #F8FAFC, #5cb8b2, #c5a55a);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ─── PREMIUM: Morphing gradient blobs (#21) ─── */
+@keyframes blob-morph {
+
+  0%,
+  100% {
+    border-radius: 40% 60% 60% 40% / 60% 30% 70% 40%;
+    transform: translate(0, 0) rotate(0deg);
+  }
+
+  25% {
+    border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%;
+    transform: translate(20px, -30px) rotate(90deg);
+  }
+
+  50% {
+    border-radius: 60% 40% 30% 70% / 60% 40% 60% 30%;
+    transform: translate(-10px, 20px) rotate(180deg);
+  }
+
+  75% {
+    border-radius: 40% 60% 50% 50% / 30% 60% 40% 70%;
+    transform: translate(15px, -15px) rotate(270deg);
+  }
+}
+
+@keyframes blob-color-shift {
+
+  0%,
+  100% {
+    opacity: 0.07;
+    filter: hue-rotate(0deg) blur(80px);
+  }
+
+  33% {
+    opacity: 0.12;
+    filter: hue-rotate(30deg) blur(100px);
+  }
+
+  66% {
+    opacity: 0.08;
+    filter: hue-rotate(-20deg) blur(90px);
+  }
+}
+
+.gradient-blob {
+  position: absolute;
+  pointer-events: none;
+  animation: blob-morph 20s ease-in-out infinite, blob-color-shift 15s ease-in-out infinite;
+  will-change: transform, border-radius, filter;
+}
+
+.gradient-blob-1 {
+  width: 500px;
+  height: 500px;
+  background: linear-gradient(135deg, #14b8a6, #06b6d4, #8b5cf6);
+  top: 5%;
+  left: 5%;
+  animation-delay: 0s, -3s;
+}
+
+.gradient-blob-2 {
+  width: 400px;
+  height: 400px;
+  background: linear-gradient(225deg, #f59e0b, #ef4444, #ec4899);
+  bottom: 10%;
+  right: 8%;
+  animation-delay: -5s, -8s;
+}
+
+.gradient-blob-3 {
+  width: 350px;
+  height: 350px;
+  background: linear-gradient(315deg, #6366f1, #14b8a6, #22d3ee);
+  top: 40%;
+  left: 45%;
+  animation-delay: -10s, -5s;
+}
+
+/* ─── PREMIUM: 3D Tilt card hover (#22) ─── */
+.tilt-card-3d {
+  perspective: 800px;
+  transform-style: preserve-3d;
+}
+
+.tilt-card-3d .tilt-inner {
+  transition: transform 0.1s ease-out, box-shadow 0.3s ease;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.tilt-card-3d:hover .tilt-inner {
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 30px rgba(20, 184, 166, 0.1);
+}
+
+.tilt-card-3d .tilt-shine {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.08), transparent 60%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 10;
+}
+
+.tilt-card-3d:hover .tilt-shine {
+  opacity: 1;
+}
+
+/* Keep old tilt-card for backward compat */
+.tilt-card {
+  transform-style: preserve-3d;
+  perspective: 1000px;
+  transition: transform 0.3s ease;
+}
+
+.tilt-card:hover {
+  transform: rotateX(2deg) rotateY(-3deg) scale(1.02);
+}
+
+.tilt-card .tilt-content {
+  transform: translateZ(20px);
+}
+
+/* ─── PREMIUM: Stagger reveal ─── */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.6s ease-out forwards;
+  opacity: 0;
+}
+
+/* ─── PREMIUM: Flip countdown card ─── */
+.flip-card {
+  perspective: 600px;
+}
+
+.flip-card-inner {
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-style: preserve-3d;
+}
+
+/* ─── PREMIUM: Page enter animation ─── */
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-enter {
+  animation: page-enter 0.5s ease-out;
+}
+
+/* ─── PREMIUM: Skeleton loader ─── */
+@keyframes skeleton-pulse {
+
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 0.5rem;
+}
+
+/* ─── PREMIUM: Hover glow underline ─── */
+.glow-underline {
+  position: relative;
+}
+
+.glow-underline::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #14786e, #c5a55a);
+  transition: width 0.4s ease;
+  box-shadow: 0 0 10px rgba(20, 120, 110, 0.5);
+}
+
+.glow-underline:hover::after {
+  width: 100%;
+}
+
+/* ─── Reduced Motion ─── */
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .aurora-bg::before {
+    animation: none;
+  }
+}
+
+/* ─── Scrollbar ─── */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #14786e, #0d6b62);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #5cb8b2, #14786e);
+}
+
+/* ─── Confetti animation ─── */
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(-100vh) rotate(0deg);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(100vh) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+.confetti-piece {
+  animation: confetti-fall 3s ease-out forwards;
+}
+
+/* ─── Noise texture overlay ─── */
+.noise-overlay {
+  position: relative;
+}
+
+.noise-overlay::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.03;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+  z-index: 1;
+}

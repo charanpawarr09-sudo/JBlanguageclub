@@ -1,0 +1,175 @@
+# VOXERA 2026 — Production Deployment Guide
+> Optimized for: **Fastest loads** · **Zero networking issues** · **No server crashes**
+
+---
+
+## Architecture
+
+```
+Users ──→ Vercel (Frontend CDN) ──→ Railway (Backend API) ──→ Neon (PostgreSQL)
+              Edge-cached                Auto-restart            Serverless DB
+              Global CDN                 Health checks           Connection pooling
+              ~50ms loads                Zero downtime           Auto-scaling
+```
+
+| Layer | Platform | Why |
+|-------|----------|-----|
+| **Frontend** | **Vercel** (Free) | Edge CDN with 100+ global PoPs, India nodes in Mumbai & Hyderabad. Static files served in ~50ms. Zero cold starts. |
+| **Backend** | **Railway** ($5/mo Pro) | Always-on container, auto-restarts on crash, health monitoring, 99.9% uptime SLA. |
+| **Database** | **Neon** (Free) | Already set up. Serverless PostgreSQL, auto-scales, connection pooling built-in. |
+
+---
+
+## Step 1: Prepare the Project
+
+### 1a. Create [vercel.json](file:///c:/Users/chara/Downloads/vzzz13/vercel.json) for API proxy
+
+Create this file in your project root so Vercel proxies all `/api/*` calls to your Railway backend:
+
+```json
+{
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "https://YOUR_RAILWAY_URL.railway.app/api/:path*" },
+    { "source": "/uploads/:path*", "destination": "https://YOUR_RAILWAY_URL.railway.app/uploads/:path*" }
+  ]
+}
+```
+
+> [!IMPORTANT]
+> Replace `YOUR_RAILWAY_URL` with your actual Railway domain after Step 3.
+
+### 1b. Push to GitHub
+```bash
+git init
+git add .
+git commit -m "VOXERA 2026 - production ready"
+git branch -M main
+git remote add origin https://github.com/YOUR_USERNAME/voxera-2026.git
+git push -u origin main
+```
+
+---
+
+## Step 2: Deploy Frontend on Vercel
+
+1. Go to [vercel.com](https://vercel.com) → **Sign in with GitHub**
+2. Click **"Add New Project"** → Import your `voxera-2026` repo
+3. Configure:
+   - **Framework Preset**: `Vite`
+   - **Build Command**: `npm install --legacy-peer-deps && npm run build`
+   - **Output Directory**: `dist`
+   - **Install Command**: `npm install --legacy-peer-deps`
+4. Add **Environment Variable**:
+   - `VITE_API_URL` = `https://YOUR_RAILWAY_URL.railway.app` (update after Step 3)
+5. Click **Deploy**
+
+### Add Custom Domain on Vercel
+1. Go to **Project Settings** → **Domains**
+2. Add `voxera2026.in`
+3. At your domain registrar, add:
+   - **A record**: `76.76.21.21`
+   - **CNAME** for `www`: `cname.vercel-dns.com`
+
+---
+
+## Step 3: Deploy Backend on Railway
+
+1. Go to [railway.app](https://railway.app) → **Sign in with GitHub**
+2. Click **"New Project"** → **"Deploy from GitHub Repo"**
+3. Select your `voxera-2026` repo
+
+### Configure Build & Start
+In Railway → **Settings** tab:
+- **Build Command**: `npm install --legacy-peer-deps`
+- **Start Command**: `npm run server`
+
+### Environment Variables
+In Railway → **Variables** tab, add ALL of these:
+
+| Variable | Value |
+|----------|-------|
+| `DATABASE_URL` | `postgresql://...` (your Neon connection string) |
+| `JWT_SECRET` | Random 64+ character string ([generate here](https://generate-secret.vercel.app/64)) |
+| `ADMIN_PASSWORD_HASH` | Your bcrypt hash from [.env](file:///c:/Users/chara/Downloads/vzzz13/.env) |
+| `RESEND_API_KEY` | Your Resend key |
+| `RAZORPAY_KEY_ID` | Your Razorpay key |
+| `RAZORPAY_KEY_SECRET` | Your Razorpay secret |
+| `FRONTEND_URL` | `https://voxera2026.in,https://www.voxera2026.in` |
+| `PORT` | `3000` |
+| `NODE_ENV` | `production` |
+
+### Get Your Railway URL
+After deploy, go to **Settings** → **Networking** → **Generate Domain**.
+Copy the URL (e.g., `voxera-api-production.up.railway.app`).
+
+> [!IMPORTANT]
+> Now go back to **Vercel** and update [vercel.json](file:///c:/Users/chara/Downloads/vzzz13/vercel.json) with this Railway URL, then redeploy.
+
+### Enable Health Checks
+Railway → **Settings** → **Health Check Path**: `/api/events`
+This ensures Railway auto-restarts your server if it becomes unresponsive.
+
+---
+
+## Step 4: Update Vercel Proxy URL
+
+After getting your Railway URL, update [vercel.json](file:///c:/Users/chara/Downloads/vzzz13/vercel.json):
+
+```json
+{
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "https://voxera-api-production.up.railway.app/api/:path*" },
+    { "source": "/uploads/:path*", "destination": "https://voxera-api-production.up.railway.app/uploads/:path*" }
+  ]
+}
+```
+
+Commit and push — Vercel auto-redeploys.
+
+---
+
+## Why This Setup Is Best
+
+### ⚡ Fastest Loads
+- Static HTML/CSS/JS served from **Vercel's edge CDN** (India PoPs in Mumbai/Hyderabad)
+- Users get the page in **~50ms** instead of waiting for a server to respond
+- Images, fonts, scripts all cached at the edge
+- Gzip/Brotli compression automatic
+
+### 🔒 Zero Networking Issues
+- Frontend and API are **separate services** — if one goes down, the other stays up
+- Vercel handles SSL, DNS, and CDN automatically
+- CORS is configured to accept both `voxera2026.in` and `www.voxera2026.in`
+- Rate limiting prevents abuse (auth: 10/15min, contact: 5/15min)
+
+### 💪 No Server Crashes
+- Railway **auto-restarts** your Express server if it crashes
+- Health check endpoint ensures Railway detects unresponsive servers
+- Connection pool set to 20 — handles traffic spikes
+- Neon serverless DB auto-scales — no connection limits
+- `compression` + `helmet` middleware already configured
+
+---
+
+## Post-Deploy Checklist
+
+- [ ] Visit `https://voxera2026.in` — verify homepage loads fast
+- [ ] Test admin login at `/admin`
+- [ ] Test event registration flow end-to-end
+- [ ] Submit contact form — verify rate limiting works
+- [ ] Check mobile responsiveness
+- [ ] Uncomment GA4 in [index.html](file:///c:/Users/chara/Downloads/vzzz13/index.html) → add your `G-XXXXXXXXXX` ID
+- [ ] Upload 192×192 and 512×512 icons to `public/icons/` for PWA
+- [ ] Run: `npx lighthouse https://voxera2026.in --view`
+
+---
+
+## Cost Summary
+
+| Service | Plan | Monthly Cost |
+|---------|------|-------------|
+| Vercel | Hobby (Free) | **$0** |
+| Railway | Pro | **$5** |
+| Neon | Free tier | **$0** |
+| Domain | `.in` renewal | ~₹400/yr |
+| **Total** | | **~$5/month** |

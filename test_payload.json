@@ -1,0 +1,13 @@
+{
+  "event_id": "poetry-reciting",
+  "team_size": 1,
+  "participation_type": "solo",
+  "primary_name": "Test User",
+  "primary_email": "test@example.com",
+  "primary_phone": "9999999999",
+  "college_name": "Test College",
+  "department": "CS",
+  "year_of_study": "1st Year",
+  "roll_number": "123",
+  "team_members": []
+}

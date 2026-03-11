@@ -1,0 +1,288 @@
+import 'dotenv/config';
+import express, { Request, Response, NextFunction } from 'express';
+import cors from 'cors';
+import compression from 'compression';
+import helmet from 'helmet';
+import cookieParser from 'cookie-parser';
+import path from 'path';
+import fs from 'fs';
+
+import { db } from './db/index';
+import * as schema from './db/schema';
+import { logger } from './utils/logger';
+import { generalLimiter } from './middleware/rateLimiter';
+import { verifyAdmin, AuthRequest } from './middleware/auth.middleware';
+import { upload, uploadDir, validateMagicBytes } from './routes/helpers';
+import { isCloudinaryConfigured, uploadToCloudinary } from './utils/cloudinary';
+
+// Route modules
+import authRoutes from './routes/auth.routes';
+import eventsRoutes from './routes/events.routes';
+import teamRoutes from './routes/team.routes';
+import registrationsRoutes from './routes/registrations.routes';
+import contentRoutes from './routes/content.routes';
+import adminRoutes from './routes/admin.routes';
+import contactRoutes from './routes/contact.routes';
+
+// ─── Startup Env Validation ───
+const REQUIRED_ENV_VARS = ['JWT_SECRET', 'ADMIN_PASSWORD_HASH', 'ADMIN_USERNAME'] as const;
+
+if (!process.env.DATABASE_URL) {
+    console.warn('⚠️  WARNING: DATABASE_URL not set. Database features will be unavailable.');
+}
+for (const envVar of REQUIRED_ENV_VARS) {
+    if (!process.env[envVar]) {
+        console.error(`❌ FATAL: Missing required environment variable: ${envVar}`);
+        console.error('   Please ensure all required env vars are set. Exiting...');
+        process.exit(1);
+    }
+}
+
+const app = express();
+const PORT = parseInt(process.env.PORT || '3000', 10);
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
+
+/* ─── HTTPS Redirect (Production) ─── */
+if (process.env.NODE_ENV === 'production') {
+    const CANONICAL_HOST = process.env.CANONICAL_HOST || 'jblanguageclub.in';
+    app.use((req: Request, res: Response, next: NextFunction) => {
+        if (req.headers['x-forwarded-proto'] !== 'https') {
+            return res.redirect(301, `https://${CANONICAL_HOST}${req.url}`);
+        }
+        next();
+    });
+}
+
+/* ─── Static Files (Production) ─── */
+const distPath = path.resolve(process.cwd(), 'dist');
+
+app.use(compression());
+
+// Serve uploaded files (with 7-day cache)
+app.use('/uploads', express.static(path.resolve(process.cwd(), 'uploads'), { maxAge: '7d' }));
+
+// Cache static assets with hashed filenames for 1 year
+app.use('/assets', express.static(path.join(distPath, 'assets'), {
+    maxAge: '365d',
+    immutable: true,
+}));
+
+// Other static files (index.html, etc.) — short cache
+app.use(express.static(distPath, {
+    maxAge: '1h',
+    setHeaders: (res, filePath) => {
+        if (filePath.endsWith('.html')) {
+            res.setHeader('Cache-Control', 'no-cache');
+        }
+    },
+}));
+
+/* ─── Global Middleware ─── */
+app.use(helmet({ contentSecurityPolicy: false }));
+
+// Security headers
+app.use((_req: Request, res: Response, next: NextFunction) => {
+    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    next();
+});
+
+const allowedOrigins = FRONTEND_URL.split(',').map(o => o.trim()).filter(Boolean);
+app.use(cors({
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true,
+}));
+app.use(cookieParser());
+app.use(express.json({ limit: '5mb' }));
+app.use(generalLimiter);
+
+/* ─── Health Check ─── */
+app.get('/api/health', (_req: Request, res: Response) => {
+    res.status(200).json({ status: 'ok', uptime: process.uptime(), timestamp: Date.now() });
+});
+
+/* ─── Mount Route Modules ─── */
+app.use(authRoutes);
+app.use(eventsRoutes);
+app.use(teamRoutes);
+app.use(registrationsRoutes);
+app.use(contentRoutes);
+app.use(adminRoutes);
+app.use(contactRoutes);
+
+/* ─── Auto Image Search (Pexels proxy) ─── */
+app.get('/api/admin/search-images', verifyAdmin as any, async (req: AuthRequest, res: Response) => {
+    const query = String(req.query.q || '').trim();
+    const page = Math.max(1, parseInt(String(req.query.page || '1'), 10) || 1);
+    if (!query) { res.status(400).json({ error: 'Missing search query (?q=...)' }); return; }
+
+    const apiKey = process.env.PEXELS_API_KEY;
+    if (!apiKey) {
+        res.status(503).json({ error: 'PEXELS_API_KEY not configured. Get a free key at https://www.pexels.com/api/' });
+        return;
+    }
+
+    try {
+        const url = `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=9&orientation=landscape&page=${page}`;
+        const response = await fetch(url, { headers: { Authorization: apiKey } });
+        if (!response.ok) {
+            logger.warn('Pexels API error', { status: response.status });
+            res.status(502).json({ error: 'Image search failed' });
+            return;
+        }
+        const data = await response.json() as { photos: Array<{ id: number; src: { large: string; medium: string; landscape: string }; alt: string; photographer: string }> };
+        const images = data.photos.map(p => ({
+            id: p.id,
+            url: p.src.landscape,
+            preview: p.src.medium,
+            alt: p.alt || query,
+            credit: p.photographer,
+        }));
+        res.json({ images, query });
+    } catch (err) {
+        logger.error('Image search error', { error: String(err) });
+        res.status(500).json({ error: 'Image search failed' });
+    }
+});
+
+/* ─── Image Upload Endpoint (with magic byte validation #8) ─── */
+app.post('/api/admin/upload', verifyAdmin as any, upload.single('image'), async (req: AuthRequest, res: Response) => {
+    if (!req.file) { res.status(400).json({ error: 'No valid image file provided. Allowed: jpg, png, webp, gif, svg (max 5MB)' }); return; }
+
+    // Validate magic bytes to prevent MIME spoofing (#8)
+    if (!validateMagicBytes(req.file.path, req.file.mimetype)) {
+        await fs.promises.unlink(req.file.path).catch(() => { });
+        res.status(400).json({ error: 'File content does not match its declared type. Upload rejected.' });
+        return;
+    }
+
+    // Upload to Cloudinary if configured, else use local disk
+    if (isCloudinaryConfigured()) {
+        try {
+            const result = await uploadToCloudinary(req.file.path, {
+                folder: 'jblc/team',
+                transformation: {
+                    width: 600,
+                    height: 600,
+                    crop: 'fill',
+                    quality: 90,
+                    format: 'webp',
+                },
+            });
+            // Clean up local temp file
+            await fs.promises.unlink(req.file.path).catch(() => { });
+            res.json({ url: result.url, filename: result.publicId, size: result.bytes });
+            return;
+        } catch (err) {
+            logger.warn('Cloudinary upload failed, falling back to local', { error: String(err) });
+        }
+    }
+
+    const url = `/uploads/${req.file.filename}`;
+    res.json({ url, filename: req.file.filename, size: req.file.size });
+});
+
+/* ─── Event Image Upload with Auto-Resize ─── */
+const ALLOWED_IMAGE_TYPES = new Set(['banner', 'thumbnail']);
+
+app.post('/api/admin/upload-event-image', verifyAdmin as any, upload.single('image'), async (req: AuthRequest, res: Response) => {
+    if (!req.file) { res.status(400).json({ error: 'No valid image file provided. Allowed: jpg, png, webp, gif, svg (max 5MB)' }); return; }
+
+    // Validate magic bytes
+    if (!validateMagicBytes(req.file.path, req.file.mimetype)) {
+        await fs.promises.unlink(req.file.path).catch(() => { });
+        res.status(400).json({ error: 'File content does not match its declared type. Upload rejected.' });
+        return;
+    }
+
+    // Whitelist image type to prevent path traversal (#CR-5)
+    const rawType = String(req.body?.type || 'thumbnail');
+    const imageType = ALLOWED_IMAGE_TYPES.has(rawType) ? rawType : 'thumbnail';
+
+    // Define target dimensions
+    const dimensions = imageType === 'banner'
+        ? { width: 1600, height: 900 }   // 16:9 for detail page hero
+        : { width: 800, height: 530 };    // ~3:2 for event card thumbnail
+
+    // Upload to Cloudinary if configured
+    if (isCloudinaryConfigured()) {
+        try {
+            const result = await uploadToCloudinary(req.file.path, {
+                folder: `jblc/events/${imageType}`,
+                transformation: {
+                    width: dimensions.width,
+                    height: dimensions.height,
+                    crop: 'fill',
+                    quality: 82,
+                    format: 'webp',
+                },
+            });
+            // Clean up local temp file
+            await fs.promises.unlink(req.file.path).catch(() => { });
+            res.json({ url: result.url, filename: result.publicId, size: result.bytes, type: imageType, dimensions, resized: true });
+            return;
+        } catch (err) {
+            logger.warn('Cloudinary upload failed, falling back to local', { error: String(err) });
+        }
+    }
+
+    // Fallback: local Sharp resize
+    try {
+        const sharp = (await import('sharp')).default;
+        const outputName = `${Date.now()}-${Math.random().toString(36).slice(2, 6)}-${imageType}.webp`;
+        const outputPath = path.join(uploadDir, outputName);
+
+        // Read into buffer first to avoid Windows EBUSY file-lock issues
+        const inputBuffer = await fs.promises.readFile(req.file.path);
+
+        await sharp(inputBuffer)
+            .resize(dimensions.width, dimensions.height, {
+                fit: 'cover',
+                position: 'attention',  // smart crop: detects faces & focal points automatically
+            })
+            .webp({ quality: 82 })
+            .toFile(outputPath);
+
+        // Safely remove original uploaded file
+        await fs.promises.unlink(req.file.path).catch(() => { });
+
+        const url = `/uploads/${outputName}`;
+        const stat = await fs.promises.stat(outputPath);
+        logger.info(`Event image uploaded: ${imageType} → ${outputName} (${stat.size} bytes)`);
+        res.json({ url, filename: outputName, size: stat.size, type: imageType, dimensions, resized: true });
+    } catch (err) {
+        // Fallback: serve original if resize fails
+        logger.warn('Image resize failed, serving original', { error: String(err) });
+        const url = `/uploads/${req.file.filename}`;
+        res.json({ url, filename: req.file.filename, size: req.file.size, type: imageType, resized: false });
+    }
+});
+
+app.get('*', (_req: Request, res: Response) => {
+    res.setHeader('Cache-Control', 'no-cache');
+    res.sendFile(path.join(distPath, 'index.html'));
+});
+
+/* ─── Global Error Handler ─── */
+app.use((err: Error, req: Request, res: Response, _next: NextFunction) => {
+    logger.error(`Unhandled error for ${req.url}`, { message: err.message, stack: err.stack, path: req.path });
+    res.status(500).json({ error: 'Internal server error', msg: err.message });
+});
+
+/* ─── Start ─── */
+app.listen(PORT, () => {
+    logger.info(`Server running on port ${PORT}`);
+    logger.info('Routes mounted: auth, events, team, registrations, content, admin, contact');
+});
+
+export default app;
