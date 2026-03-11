@@ -44,8 +44,9 @@ The registration process uses a **2-step flow** (no payment processing):
 | Poetry Reciting | https://forms.gle/gRye4xaCtEpuXWLc7 |
 | Pitch Perfect | https://forms.gle/B5xCvuGFv33ZDaS8A |
 | Open Mic | https://forms.gle/eKtGg9opFuhR4sm2A |
-| Treasure Hunt | _Not yet available_ |
-| Film Screening | _Not yet available_ |
+| Treasure Hunt | https://forms.gle/UcnLKWUsiSKGEjbx6 |
+| Film Screening 1 (Chhichhore) | https://forms.gle/ZaBVJsPnbwD5GrjGA |
+| Film Screening 2 (Dead Poet Society) | https://forms.gle/jZ6qgTbDCcKD3ihg9 |
 
 > **Note:** Razorpay has been fully removed from this project. There is no payment gateway integration. Fee collection happens offline after the organizer reviews Google Form submissions.
 
