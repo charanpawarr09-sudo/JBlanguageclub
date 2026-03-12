@@ -223,9 +223,9 @@ const seedEvents = [
     prize: 'An Unforgettable Experience',
     google_form_url: null,
     rounds: [
-      { title: '🎬 Screening 1 — Chhichhore', description: 'A heartwarming Bollywood blockbuster that celebrates friendship, failure, and the spirit of never giving up. Relive the hostel days and learn that losers of today are the winners of tomorrow.', fee: 50 },
-      { title: '🎬 Screening 2 — Dead Poets Society', description: 'A timeless classic starring Robin Williams. A story about seizing the day, thinking for yourself, and the transformative power of poetry and education. "Carpe Diem!"', fee: 50 },
-      { title: '🎬 Screening 3 — To Be Announced', description: 'The final film is a surprise! Stay tuned — we\'re saving the best reveal for last. Follow our socials for the big announcement.', fee: 50 },
+      { title: '🎬 Screening 1 — Chhichhore', description: 'A heartwarming Bollywood blockbuster that celebrates friendship, failure, and the spirit of never giving up. Relive the hostel days and learn that losers of today are the winners of tomorrow.', fee: 80, google_form_url: 'https://forms.gle/ZaBVJsPnbwD5GrjGA' },
+      { title: '🎬 Screening 2 — Dead Poets Society', description: 'A timeless classic starring Robin Williams. A story about seizing the day, thinking for yourself, and the transformative power of poetry and education. "Carpe Diem!"', fee: 80, google_form_url: 'https://forms.gle/jZ6qgTbDCcKD3ihg9' },
+      { title: '🎬 Screening 3 — To Be Announced', description: 'The final film is a surprise! Stay tuned — we\'re saving the best reveal for last. Follow our socials for the big announcement.', fee: 80 },
     ],
     rules: [
       'Entry is on a first-come, first-served basis',
@@ -247,11 +247,11 @@ const seedEvents = [
 ];
 
 async function seed() {
-  console.log('🌱 Seeding VOXERA 2026 database...');
+  console.log('🌱 Seeding VOXERA 2026 database (upsert mode)...');
 
   try {
     for (const event of seedEvents) {
-      await db.insert(schema.events).values({
+      const eventData = {
         id: event.id,
         title: event.title,
         description: event.description,
@@ -281,10 +281,45 @@ async function seed() {
         display_order: event.display_order,
         created_at: new Date(),
         updated_at: new Date(),
-      }).onConflictDoNothing();
+      };
+
+      await db.insert(schema.events).values(eventData)
+        .onConflictDoUpdate({
+          target: schema.events.id,
+          set: {
+            title: eventData.title,
+            description: eventData.description,
+            short_description: eventData.short_description,
+            date: eventData.date,
+            time: eventData.time,
+            location: eventData.location,
+            category: eventData.category,
+            image: eventData.image,
+            banner_image: eventData.banner_image,
+            thumbnail_image: eventData.thumbnail_image,
+            rules: eventData.rules,
+            team_size: eventData.team_size,
+            prize: eventData.prize,
+            registration_fee_single: eventData.registration_fee_single,
+            registration_fee_team: eventData.registration_fee_team,
+            team_size_min: eventData.team_size_min,
+            team_size_max: eventData.team_size_max,
+            registration_enabled: eventData.registration_enabled,
+            is_published: eventData.is_published,
+            google_form_url: eventData.google_form_url,
+            slots_total: eventData.slots_total,
+            rounds: eventData.rounds,
+            judging_criteria: eventData.judging_criteria,
+            coordinators: eventData.coordinators,
+            display_order: eventData.display_order,
+            updated_at: new Date(),
+          },
+        });
+
+      console.log(`  ✅ Upserted: ${event.title}`);
     }
 
-    console.log(`✅ Seeded ${seedEvents.length} events successfully.`);
+    console.log(`\n🎉 Seeded/updated ${seedEvents.length} events successfully.`);
   } catch (err) {
     console.error('❌ Seed failed:', err);
     process.exit(1);

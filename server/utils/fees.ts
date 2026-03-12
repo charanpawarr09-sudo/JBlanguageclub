@@ -40,9 +40,11 @@ const FEE_RULES: Record<string, FeeRule> = {
 export function calculateFee(event: any, teamSize: number, roundFee?: number): number {
     if (!event) throw new Error("Event is required for fee calculation");
 
-    // Film screening specific logic
-    if (event.id === 'film-screening') {
-        return roundFee ?? event.registration_fee_single ?? 80;
+    const title = (event.title || '').toLowerCase();
+
+    // Film screening specific logic (match by ID or title)
+    if (event.id === 'film-screening' || title.includes('screening') || title.includes('film')) {
+        return roundFee ?? (event.registration_fee_single > 0 ? event.registration_fee_single : 80);
     }
 
     const minTeamSize = event.team_size_min ?? 1;
@@ -55,10 +57,25 @@ export function calculateFee(event: any, teamSize: number, roundFee?: number): n
         );
     }
 
+    // If the event has a valid fee in DB, use it
+    if (teamSize === 1 && event.registration_fee_single > 0) {
+        return event.registration_fee_single;
+    }
+    if (teamSize > 1 && event.registration_fee_team > 0) {
+        return event.registration_fee_team;
+    }
+
+    // Fallback: infer fee from event title for admin-created events with fee=0
+    if (title.includes('poetry') || title.includes('recit')) return teamSize === 1 ? 99 : 99 * teamSize;
+    if (title.includes('debate')) return teamSize === 1 ? 99 : 150;
+    if (title.includes('pitch')) return teamSize === 1 ? 50 : 99;
+    if (title.includes('open mic') || title.includes('open-mic')) return teamSize === 1 ? 99 : 150;
+    if (title.includes('treasure') || title.includes('hunt')) return 120;
+
+    // Ultimate fallback
     if (teamSize === 1) {
         return event.registration_fee_single ?? 0;
     } else {
-        // If it's a team, use registration_fee_team if provided, otherwise default to single * teamSize
         return event.registration_fee_team ?? ((event.registration_fee_single ?? 0) * teamSize);
     }
 }

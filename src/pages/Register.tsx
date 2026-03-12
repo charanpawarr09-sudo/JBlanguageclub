@@ -137,13 +137,31 @@ export default function Register() {
   }, [selectedEvent, participationType, teamMembers.length]);
 
   const displayFee = useMemo(() => {
-    if (!selectedEventId) return 0;
-    // For film-screening with per-round pricing, use the selected film's fee
-    if (selectedEventId === 'film-screening' && selectedRoundIndex !== null && selectedEvent?.rounds) {
+    if (!selectedEventId || !selectedEvent) return 0;
+    // For events with per-round pricing, use the selected round's fee
+    if (selectedEvent.rounds && selectedEvent.rounds.length > 0 && selectedRoundIndex !== null) {
       const round = selectedEvent.rounds[selectedRoundIndex] as any;
-      if (round?.fee) return round.fee;
+      if (round?.fee != null && round.fee > 0) return round.fee;
     }
-    return estimateFee(selectedEventId, effectiveTeamSize);
+    // Use the event object's own fee fields (works for DB-created events with any ID)
+    if (effectiveTeamSize > 1 && selectedEvent.registration_fee_team != null && selectedEvent.registration_fee_team > 0) {
+      return selectedEvent.registration_fee_team;
+    }
+    if (selectedEvent.registration_fee_single != null && selectedEvent.registration_fee_single > 0) {
+      return selectedEvent.registration_fee_single;
+    }
+    // Try hardcoded lookup by event ID
+    const hardcoded = estimateFee(selectedEventId, effectiveTeamSize);
+    if (hardcoded > 0) return hardcoded;
+    // Final fallback: infer fee from event title for admin-created events
+    const title = (selectedEvent.title || '').toLowerCase();
+    if (title.includes('screening') || title.includes('film')) return 80;
+    if (title.includes('poetry') || title.includes('recit')) return 99;
+    if (title.includes('debate')) return effectiveTeamSize > 1 ? 150 : 99;
+    if (title.includes('pitch')) return effectiveTeamSize > 1 ? 99 : 50;
+    if (title.includes('open mic') || title.includes('open-mic')) return effectiveTeamSize > 1 ? 150 : 99;
+    if (title.includes('treasure') || title.includes('hunt')) return 120;
+    return 0;
   }, [selectedEventId, effectiveTeamSize, selectedRoundIndex, selectedEvent]);
 
   /* ─── When event changes, reset ─── */
@@ -629,7 +647,11 @@ export default function Register() {
                           </span>
                         </div>
                         <p className="text-white/40 text-xs">
-                          {FEE_DESCRIPTIONS[selectedEventId] || ''} · for{' '}
+                          {FEE_DESCRIPTIONS[selectedEventId] || (
+                            selectedEvent.registration_fee_team
+                              ? `₹${selectedEvent.registration_fee_single} solo / ₹${selectedEvent.registration_fee_team} team`
+                              : `₹${selectedEvent.registration_fee_single} per person`
+                          )} · for{' '}
                           {effectiveTeamSize > 1 ? `team of ${effectiveTeamSize}` : 'individual'}
                         </p>
                       </motion.div>

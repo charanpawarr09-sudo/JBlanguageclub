@@ -85,10 +85,23 @@ router.post('/api/registrations/pre-register', registrationLimiter, validate(pre
 
         logger.info('Pre-registration saved', { registrationCode, event_id });
 
+        // Resolve the correct Google Form URL to return to the client
+        let resolvedFormUrl: string | null = null;
+        if (event_id === 'film-screening' && selected_round_index !== undefined && selected_round_index !== null) {
+            const rounds = (event as any).rounds as Array<{ title: string; description: string; fee?: number; google_form_url?: string }> | null;
+            if (rounds && rounds[selected_round_index] && rounds[selected_round_index].google_form_url) {
+                resolvedFormUrl = rounds[selected_round_index].google_form_url!;
+            }
+        }
+        if (!resolvedFormUrl) {
+            resolvedFormUrl = (event as any).google_form_url || null;
+        }
+
         res.status(201).json({
             registration_code: registrationCode,
             event_title: event.title,
             fee_amount: amountPaise,
+            google_form_url: resolvedFormUrl,
         });
     } catch (err: unknown) {
         const message = err instanceof Error ? err.message : 'Pre-registration failed';
